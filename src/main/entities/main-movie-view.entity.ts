@@ -24,5 +24,5 @@ export class MainMovieView {
   movie_poster: string;
 
   @ViewColumn()
-  country_code: string;
+  country: string;
 }
