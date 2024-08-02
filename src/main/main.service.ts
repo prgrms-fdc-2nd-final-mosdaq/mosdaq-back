@@ -17,7 +17,7 @@ export class MainService {
         movieId: movie.movie_id,
         movieTitle: movie.movie_title,
         posterUrl: movie.movie_poster,
-        countryCode: movie.country_code,
+        countryCode: movie.country,
         beforePrice: movie.before_price,
         afterPrice: movie.after_price,
         beforePriceDate: movie.before_date,
