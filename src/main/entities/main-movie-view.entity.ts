@@ -15,10 +15,10 @@ export class MainMovieView {
   after_price: number;
 
   @ViewColumn()
-  before_date: string;
+  before_date: Date;
 
   @ViewColumn()
-  after_date: string;
+  after_date: Date;
 
   @ViewColumn()
   movie_poster: string;
