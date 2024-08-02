@@ -1,28 +1,31 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
-import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModel } from './users/entities/users.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MainMovieView } from './main/entities/main-movie-view.entity';
+import { MainModule } from './main/main.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: '127.0.0.1',
-      port: 5432,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      entities: [UsersModel],
-      synchronize: true,
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes the ConfigModule globally available
     }),
-    AuthModule,
-    AuthModule,
-    UsersModule,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('POSTGRES_HOST'),
+        port: configService.get<number>('POSTGRES_PORT'),
+        username: configService.get<string>('POSTGRES_USER'),
+        password: configService.get<string>('POSTGRES_PASSWORD'),
+        database: configService.get<string>('POSTGRES_DB'),
+        entities: [MainMovieView],
+        synchronize: false,
+      }),
+      inject: [ConfigService],
+    }),
+    MainModule,
   ],
   controllers: [AppController],
   providers: [AppService],
