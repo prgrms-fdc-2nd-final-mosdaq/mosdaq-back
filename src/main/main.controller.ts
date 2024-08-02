@@ -6,7 +6,7 @@ export class MainController {
   constructor(private mainService: MainService) {}
 
   @Get('/')
-  mainMovie(): string {
-    return this.mainService.getMainMovie();
+  async mainMovie() {
+    return this.mainService.getMainMovies();
   }
 }

@@ -1,24 +1,28 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { MainMovieView } from './entities/main-movie-view.entity';
 
 @Injectable()
 export class MainService {
-  constructor() {}
+  constructor(
+    @InjectRepository(MainMovieView)
+    private mainMovieRepository: Repository<MainMovieView>,
+  ) {}
 
-  getMainMovie(): any {
-    const movieInfo = {
-      movieId: 60,
-      movieTitle: '어벤져스: 엔드게임',
-      posterUrl: 'http://file.koreafilm.or.kr/thm/02/00/05/14/tn_DPF018019.jpg',
-      countryCode: 'US',
-      beforePrice: 110.28,
-      afterPrice: 133.85,
-      beforePriceDate: '2019-03-27',
-      afterPriceDate: '2019-05-22',
-    };
-    const movieList = [movieInfo];
-
+  async getMainMovies(): Promise<any> {
+    const movieList = await this.mainMovieRepository.find();
     return {
-      movieList,
+      movieList: movieList.map((movie) => ({
+        movieId: movie.movie_id,
+        movieTitle: movie.movie_title,
+        posterUrl: movie.movie_poster,
+        countryCode: movie.country_code,
+        beforePrice: movie.before_price,
+        afterPrice: movie.after_price,
+        beforePriceDate: movie.before_date,
+        afterPriceDate: movie.after_date,
+      })),
       movieListCount: movieList.length,
     };
   }
