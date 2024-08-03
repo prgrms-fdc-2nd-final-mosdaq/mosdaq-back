@@ -18,7 +18,7 @@ import { UsersModel } from './users/entities/users.entity';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [UsersModel],
-      synchronize: true,
+      synchronize: false,
     }),
     AuthModule,
     AuthModule,
