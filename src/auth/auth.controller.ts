@@ -10,8 +10,8 @@ import { AuthService } from './auth.service';
 import { UseGuards } from '@nestjs/common';
 import { GoogleAuthGuard } from './auth.guard';
 import { Request, Response } from '@nestjs/common';
-import { AccessTokenGuard } from './accessToken.guard';
 import { RefreshAuthTokenDto } from './dto/refreshAuthToken.dto';
+import { AccessTokenGuard } from './accessToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -45,5 +45,17 @@ export class AuthController {
       );
 
     return { accessToken, refreshToken };
+  }
+
+  @Post('logout')
+  @UseGuards(AccessTokenGuard)
+  @UsePipes(new ValidationPipe())
+  async logout(@Body() refreshAuthTokenDto: RefreshAuthTokenDto) {
+    const userId: number = await this.authService.getUserIdFromToken(
+      refreshAuthTokenDto.refreshToken,
+    );
+
+    await this.authService.logout(userId);
+    return { message: '로그아웃되었습니다.' };
   }
 }

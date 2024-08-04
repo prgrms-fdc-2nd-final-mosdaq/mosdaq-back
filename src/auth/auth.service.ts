@@ -99,4 +99,13 @@ export class AuthService {
       }
     }
   }
+
+  async logout(userId: number) {
+    try {
+      await this.usersService.deleteRefreshToken(userId);
+    } catch {
+      console.log('Error while logout');
+      throw new BadRequestException();
+    }
+  }
 }

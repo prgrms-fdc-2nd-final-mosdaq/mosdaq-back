@@ -90,4 +90,13 @@ export class UsersService {
       throw new BadRequestException();
     }
   }
+
+  async deleteRefreshToken(userId: number) {
+    try {
+      await this.userRepository.update(userId, { refresh_token: null });
+    } catch {
+      console.log('Error while delete refresh token by user_id');
+      throw new BadRequestException();
+    }
+  }
 }
