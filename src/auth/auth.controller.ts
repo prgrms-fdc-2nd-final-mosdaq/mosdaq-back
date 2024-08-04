@@ -1,8 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UseGuards } from '@nestjs/common';
 import { GoogleAuthGuard } from './auth.guard';
 import { Request, Response } from '@nestjs/common';
+import { AccessTokenGuard } from './accessToken.guard';
+import { RefreshAuthTokenDto } from './dto/refreshAuthToken.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,5 +29,21 @@ export class AuthController {
     const tokens = await this.authService.getTokens(user);
 
     res.json(tokens);
+  }
+
+  @Post('refresh')
+  @UsePipes(new ValidationPipe())
+  async refreshAuthToken(@Body() refreshAuthTokenDto: RefreshAuthTokenDto) {
+    const userId: number = await this.authService.getUserIdFromToken(
+      refreshAuthTokenDto.refreshToken,
+    );
+
+    const { refreshToken, accessToken } =
+      await this.authService.validateAndGetNewTokens(
+        refreshAuthTokenDto.refreshToken,
+        userId,
+      );
+
+    return { accessToken, refreshToken };
   }
 }

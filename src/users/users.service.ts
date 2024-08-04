@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersModel } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -33,10 +34,9 @@ export class UsersService {
       const savedUser = await this.userRepository.save(newUser);
       return savedUser;
     } catch (error) {
-      throw new HttpException(
-        'Error finding or saving user',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // db error는 로깅 후 400으로 반환
+      console.log('Error in findUserByEmailOrSave');
+      throw new BadRequestException();
     }
   }
 
@@ -47,17 +47,16 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException();
       }
 
       user.refresh_token = refreshToken;
 
       await this.userRepository.save(user);
     } catch (error) {
-      throw new HttpException(
-        'Error saving refresh token',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // db error는 로깅 후 400으로 반환
+      console.log('Error while save refresh token');
+      throw new BadRequestException();
     }
   }
 
@@ -68,12 +67,27 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundException();
       }
 
       return user;
     } catch (error) {
-      throw new NotFoundException();
+      // db error는 로깅 후 400으로 반환
+      console.log('Error while find user by id');
+      throw new BadRequestException();
+    }
+  }
+
+  async findRefreshTokenByUserId(userId: number) {
+    try {
+      const user = await this.findUserById(userId);
+      if (!user) throw new NotFoundException();
+
+      return user.refresh_token;
+    } catch (error) {
+      // db error는 로깅 후 400으로 반환
+      console.log('Error while find refresh token by user_id');
+      throw new BadRequestException();
     }
   }
 }
