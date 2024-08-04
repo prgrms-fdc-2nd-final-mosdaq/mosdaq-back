@@ -34,6 +34,7 @@ export class UsersService {
       const savedUser = await this.userRepository.save(newUser);
       return savedUser;
     } catch (error) {
+      // TODO:
       // db error는 로깅 후 400으로 반환
       console.log('Error in findUserByEmailOrSave');
       throw new BadRequestException();
@@ -54,6 +55,7 @@ export class UsersService {
 
       await this.userRepository.save(user);
     } catch (error) {
+      // TODO:
       // db error는 로깅 후 400으로 반환
       console.log('Error while save refresh token');
       throw new BadRequestException();
@@ -72,6 +74,7 @@ export class UsersService {
 
       return user;
     } catch (error) {
+      // TODO:
       // db error는 로깅 후 400으로 반환
       console.log('Error while find user by id');
       throw new BadRequestException();
@@ -85,6 +88,7 @@ export class UsersService {
 
       return user.refresh_token;
     } catch (error) {
+      // TODO:
       // db error는 로깅 후 400으로 반환
       console.log('Error while find refresh token by user_id');
       throw new BadRequestException();
@@ -95,6 +99,7 @@ export class UsersService {
     try {
       await this.userRepository.update(userId, { refresh_token: null });
     } catch {
+      // TODO:
       console.log('Error while delete refresh token by user_id');
       throw new BadRequestException();
     }

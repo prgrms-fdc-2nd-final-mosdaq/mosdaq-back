@@ -62,6 +62,7 @@ export class AuthService {
         { expiresIn: expiresIn },
       );
     } catch {
+      // TODO:
       console.log('Error while assign token');
       throw new BadRequestException();
     }
@@ -75,6 +76,7 @@ export class AuthService {
       // 현재 시간과 비교
       return payload.exp < Math.floor(Date.now() / 1000) ? true : false;
     } catch {
+      // TODO:
       console.log('Error while checking token expired');
       throw new BadRequestException();
     }
@@ -88,6 +90,7 @@ export class AuthService {
       // user_id 반환
       return payload.sub;
     } catch (error) {
+      // TODO:
       if (error instanceof JsonWebTokenError) {
         throw new UnauthorizedException(
           '유효하지 않은 토큰입니다. 다시 로그인 하십시오.',
@@ -104,6 +107,7 @@ export class AuthService {
     try {
       await this.usersService.deleteRefreshToken(userId);
     } catch {
+      // TODO:
       console.log('Error while logout');
       throw new BadRequestException();
     }
