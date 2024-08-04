@@ -21,7 +21,6 @@ import { UsersModel } from './users/entities/users.entity';
       synchronize: false,
     }),
     AuthModule,
-    AuthModule,
     UsersModule,
   ],
   controllers: [AppController],
