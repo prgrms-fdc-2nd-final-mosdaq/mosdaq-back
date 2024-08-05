@@ -1,4 +1,10 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  HttpException,
+  HttpStatu,
+} from '@nestjs/common';
 import { MainService } from './main.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
@@ -40,8 +46,21 @@ export class MainController {
       },
     },
   })
+  @ApiResponse({
+    status: 500,
+    description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
+  })
   async mainMovie() {
-    return this.mainService.getMainMovies();
+    // TOOD: 에러 핸들링
+    return await this.mainService.getMainMovies();
+    // try {
+    // } catch (err) {
+    //   console.error(err);
+    //   throw new HttpException(
+    //     'Failed to fetch main movies',
+    //     HttpStatus.INTERNAL_SERVER_ERROR,
+    //   );
+    // }
   }
 
   @Get('/poll')
@@ -79,11 +98,21 @@ export class MainController {
       },
     },
   })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 쿼리 매개변수입니다.',
+  })
+  @ApiResponse({
+    status: 500,
+    description:
+      '서버 내부 오류로 인해 투표 중인 영화 목록을 가져올 수 없습니다.',
+  })
   async popularPollingMovies(@Query('poll') poll: string) {
     if (poll === 'true') {
       return this.mainService.getPopularPollingMovies();
     }
     // TODO: poll === 'false'
     return { message: 'Invalid query parameter' };
+    // TOOD: 에러 핸들링
   }
 }
