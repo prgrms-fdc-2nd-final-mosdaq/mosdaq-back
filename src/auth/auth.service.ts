@@ -7,14 +7,50 @@ import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from '@nestjs/config';
+import { GoogleOAuthDto } from './dto/googleOAuth.dto';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
+  private oauthClient: OAuth2Client;
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
+    this.oauthClient = new OAuth2Client(clientId);
+  }
+
+  async findUserByEmailOrSave(email: string, name: string, providerId: string) {
+    try {
+      const user = await this.usersService.findUserByEmailOrSave(
+        email,
+        name,
+        providerId,
+      );
+
+      return user;
+    } catch {}
+  }
+
+  async validateGoogleOAuthDto(googleOAuthDto: GoogleOAuthDto) {
+    try {
+      const { token } = googleOAuthDto;
+
+      // Google 토큰 검증
+      const ticket = await this.oauthClient.verifyIdToken({
+        idToken: token,
+        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+      });
+
+      return ticket.getPayload();
+    } catch {
+      // TODO:
+      console.log('error while verify googleOAuthDto');
+      throw new BadRequestException();
+    }
+  }
 
   async getTokens(user: UsersModel) {
     const accessToken = this.assignJwtToken(user, false);

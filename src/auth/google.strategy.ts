@@ -3,14 +3,18 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { UsersService } from 'src/users/users.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy) {
-  constructor(private userService: UsersService) {
+  constructor(
+    private readonly userService: UsersService,
+    private readonly configService: ConfigService,
+  ) {
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID, // 클라이언트 ID
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET, // 시크릿
-      callbackURL: 'http://localhost:3000/auth/google', // 콜백 URL
+      clientID: configService.get<string>('GOOGLE_CLIENT_ID'), // 클라이언트 ID
+      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET'), // 시크릿
+      callbackURL: configService.get<string>('GOOGLE_STRATEGY_CALLBACK_URL'), // 콜백 URL
       scope: ['email', 'profile'], // scope
     });
   }
