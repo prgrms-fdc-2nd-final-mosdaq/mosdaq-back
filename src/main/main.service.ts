@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MainMovieView } from './entities/main-movie-view.entity';
-import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity'; // 추가
+import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
 
 @Injectable()
 export class MainService {
@@ -10,7 +10,7 @@ export class MainService {
     @InjectRepository(MainMovieView)
     private mainMovieRepository: Repository<MainMovieView>,
     @InjectRepository(PopularMoviePollingView)
-    private popularMoviePollingRepository: Repository<PopularMoviePollingView>, // 추가
+    private popularMoviePollingRepository: Repository<PopularMoviePollingView>,
   ) {}
 
   async getMainMovies(): Promise<any> {
@@ -40,7 +40,6 @@ export class MainService {
   }
 
   async getPopularMoviePollings(userId: number | null): Promise<any> {
-    // 추가
     try {
       const queryBuilder = this.popularMoviePollingRepository
         .createQueryBuilder('pmv')
@@ -57,32 +56,28 @@ export class MainService {
           'pmv.down_polls AS down',
           "CASE WHEN p.poll_flag IS TRUE THEN 'up' WHEN p.poll_flag IS FALSE THEN 'down' ELSE NULL END AS myPollResult",
           'pmv.movie_poster AS posterUrl',
+          'pmv.poll_count AS pollCount',
         ])
         .orderBy('pmv.poll_count', 'DESC')
         .addOrderBy('pmv.movie_open_date', 'ASC')
         .limit(5);
 
+      // TODO: queryBuilder.getRawMany() 이후 movietitle 처럼 camelCase로 안나오는 이슈 해결
       const movieList = await queryBuilder.getRawMany();
-
-      const upPolls = movieList.reduce(
-        (sum, movie) => sum + movie.pmv_up_polls,
-        0,
-      );
-      const downPolls = movieList.reduce(
-        (sum, movie) => sum + movie.pmv_down_polls,
-        0,
-      );
-      const totalPolls = upPolls + downPolls;
 
       return {
         movieList: movieList.map((movie) => ({
-          movieId: movie.pmv_movie_id,
-          movieTitle: movie.pmv_movie_title,
-          posterUrl: movie.pmv_movie_poster,
-          up: totalPolls ? (movie.up / totalPolls) * 100 : 0,
-          down: totalPolls ? (movie.down / totalPolls) * 100 : 0,
-          pollCount: movie.pmv_poll_count,
-          myPollResult: userId ? (movie.p_pollFlag ? 'up' : 'down') : null,
+          movieId: parseInt(movie.movieid, 10),
+          movieTitle: movie.movietitle,
+          posterUrl: movie.posterurl,
+          up: parseInt(movie.pollcount, 10)
+            ? (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100
+            : 0,
+          down: parseInt(movie.pollcount, 10)
+            ? (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) * 100
+            : 0,
+          pollCount: parseInt(movie.pollcount, 10) || 0,
+          myPollResult: userId ? movie.mypollresult : null,
         })),
         movieListCount: movieList.length,
       };

@@ -11,12 +11,12 @@ export class MainController {
   @ApiOperation({
     summary: '대표 영화 제공 API',
     description:
-      '인기 영화 5개를 선정하여 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터를 반환합니다.',
+      '대표 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터 요청',
   })
   @ApiResponse({
     status: 200,
     description:
-      '인기 영화 5개를 선정하여 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터를 반환합니다.',
+      '서비스 운영자가 선정한 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터와 함께 반환합니다.',
     schema: {
       type: 'object',
       properties: {
@@ -63,7 +63,7 @@ export class MainController {
   })
   @ApiResponse({
     status: 200,
-    description: '성공적으로 투표 중인 영화를 반환했습니다.',
+    description: '성공적으로 투표 중인 영화 목록을 반환했습니다.',
     schema: {
       type: 'object',
       properties: {
@@ -86,9 +86,13 @@ export class MainController {
       },
     },
   })
+  @ApiResponse({
+    status: 500,
+    description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
+  })
   // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생
   async popularPollingMovies(@Query('poll') poll: string, @Req() req: any) {
-    const userId = req.user ? req.user.id : null; // req.user.id가 존재하는지 확인
+    const userId = req.user ? req.user.id : null;
     if (poll === 'true') {
       return this.mainService.getPopularMoviePollings(userId);
     }
