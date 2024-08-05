@@ -11,12 +11,12 @@ export class MainController {
   @ApiOperation({
     summary: '대표 영화 제공 API',
     description:
-      '인기 영화 5개를 선정하여 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터를 전달한다',
+      '인기 영화 5개를 선정하여 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터를 반환합니다.',
   })
   @ApiResponse({
     status: 200,
     description:
-      '인기 영화 5개를 선정하여 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터를 전달한다',
+      '인기 영화 5개를 선정하여 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터를 반환합니다.',
     schema: {
       type: 'object',
       properties: {
@@ -83,6 +83,7 @@ export class MainController {
     if (poll === 'true') {
       return this.mainService.getPopularPollingMovies();
     }
+    // TODO: poll === 'false'
     return { message: 'Invalid query parameter' };
   }
 }
