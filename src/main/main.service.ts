@@ -2,15 +2,15 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MainMovieView } from './entities/main-movie-view.entity';
-import { PopularPollingMovieView } from './entities/popular-polling-movie-view.entity'; // 추가
+import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity'; // 추가
 
 @Injectable()
 export class MainService {
   constructor(
     @InjectRepository(MainMovieView)
     private mainMovieRepository: Repository<MainMovieView>,
-    @InjectRepository(PopularPollingMovieView)
-    private popularPollingMovieRepository: Repository<PopularPollingMovieView>, // 추가
+    @InjectRepository(PopularMoviePollingView)
+    private popularMoviePollingRepository: Repository<PopularMoviePollingView>, // 추가
   ) {}
 
   async getMainMovies(): Promise<any> {
@@ -39,24 +39,50 @@ export class MainService {
     }
   }
 
-  async getPopularPollingMovies(): Promise<any> {
+  async getPopularMoviePollings(userId: number | null): Promise<any> {
     // 추가
     try {
-      const movieList = await this.popularPollingMovieRepository.find();
-      const upVotes = movieList.filter(
-        (movie) => movie.pollFlag === 'up',
-      ).length;
-      const downVotes = movieList.filter(
-        (movie) => movie.pollFlag === 'down',
-      ).length;
-      const totalVotes = upVotes + downVotes;
+      const queryBuilder = this.popularMoviePollingRepository
+        .createQueryBuilder('pmv')
+        .leftJoinAndSelect(
+          'poll',
+          'p',
+          'pmv.movie_id = p.fk_movie_id AND p.fk_user_id = :userId',
+          { userId },
+        )
+        .select([
+          'pmv.movie_id AS movieId',
+          'pmv.movie_title AS movieTitle',
+          'pmv.up_polls AS up',
+          'pmv.down_polls AS down',
+          "CASE WHEN p.poll_flag IS TRUE THEN 'up' WHEN p.poll_flag IS FALSE THEN 'down' ELSE NULL END AS myPollResult",
+          'pmv.movie_poster AS posterUrl',
+        ])
+        .orderBy('pmv.poll_count', 'DESC')
+        .addOrderBy('pmv.movie_open_date', 'ASC')
+        .limit(5);
+
+      const movieList = await queryBuilder.getRawMany();
+
+      const upPolls = movieList.reduce(
+        (sum, movie) => sum + movie.pmv_up_polls,
+        0,
+      );
+      const downPolls = movieList.reduce(
+        (sum, movie) => sum + movie.pmv_down_polls,
+        0,
+      );
+      const totalPolls = upPolls + downPolls;
+
       return {
         movieList: movieList.map((movie) => ({
-          movieId: movie.movieId,
-          movieTitle: movie.movieTitle,
-          posterUrl: movie.moviePoster,
-          up: (upVotes / totalVotes) * 100,
-          down: (downVotes / totalVotes) * 100,
+          movieId: movie.pmv_movie_id,
+          movieTitle: movie.pmv_movie_title,
+          posterUrl: movie.pmv_movie_poster,
+          up: totalPolls ? (movie.up / totalPolls) * 100 : 0,
+          down: totalPolls ? (movie.down / totalPolls) * 100 : 0,
+          pollCount: movie.pmv_poll_count,
+          myPollResult: userId ? (movie.p_pollFlag ? 'up' : 'down') : null,
         })),
         movieListCount: movieList.length,
       };

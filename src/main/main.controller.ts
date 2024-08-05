@@ -1,11 +1,11 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Req } from '@nestjs/common';
 import { MainService } from './main.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('api/v1/main-movie')
 @ApiTags('대표 영화 api')
 export class MainController {
-  constructor(private mainService: MainService) {}
+  constructor(private readonly mainService: MainService) {}
 
   @Get('/')
   @ApiOperation({
@@ -47,14 +47,6 @@ export class MainController {
   async mainMovie() {
     // TOOD: 에러 핸들링
     return await this.mainService.getMainMovies();
-    // try {
-    // } catch (err) {
-    //   console.error(err);
-    //   throw new HttpException(
-    //     'Failed to fetch main movies',
-    //     HttpStatus.INTERNAL_SERVER_ERROR,
-    //   );
-    // }
   }
 
   @Get('/poll')
@@ -85,6 +77,8 @@ export class MainController {
               posterUrl: { type: 'string' },
               up: { type: 'number' },
               down: { type: 'number' },
+              pollCount: { type: 'number' },
+              myPollResult: { type: 'string', nullable: true },
             },
           },
         },
@@ -92,21 +86,11 @@ export class MainController {
       },
     },
   })
-  @ApiResponse({
-    status: 400,
-    description: '잘못된 쿼리 매개변수입니다.',
-  })
-  @ApiResponse({
-    status: 500,
-    description:
-      '서버 내부 오류로 인해 투표 중인 영화 목록을 가져올 수 없습니다.',
-  })
-  async popularPollingMovies(@Query('poll') poll: string) {
+  // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생
+  async popularPollingMovies(@Query('poll') poll: string, @Req() req: any) {
+    const userId = req.user ? req.user.id : null; // req.user.id가 존재하는지 확인
     if (poll === 'true') {
-      return this.mainService.getPopularPollingMovies();
+      return this.mainService.getPopularMoviePollings(userId);
     }
-    // TODO: poll === 'false'
-    return { message: 'Invalid query parameter' };
-    // TOOD: 에러 핸들링
   }
 }
