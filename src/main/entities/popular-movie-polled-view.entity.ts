@@ -1,52 +1,40 @@
-import { ViewEntity, ViewColumn, Column } from 'typeorm';
+import { ViewEntity, ViewColumn } from 'typeorm';
 
 @ViewEntity('popular_movie_polled_view')
 export class PopularMoviePolledView {
-  @ViewColumn()
-  @Column({ name: 'movie_id', type: 'int' })
+  @ViewColumn({ name: 'movie_id' })
   movieId: number;
 
-  @ViewColumn()
-  @Column({ name: 'movie_title', type: 'character varying', length: 150 })
+  @ViewColumn({ name: 'movie_title' })
   movieTitle: string;
 
-  @ViewColumn()
-  @Column({ name: 'movie_open_date', type: 'date' })
+  @ViewColumn({ name: 'movie_open_date' })
   movieOpenDate: Date;
 
-  @ViewColumn()
-  @Column({ name: 'up_polls', type: 'int' })
-  upPolls: number;
-
-  @ViewColumn()
-  @Column({ name: 'down_polls', type: 'int' })
-  downPolls: number;
-
-  @ViewColumn()
-  @Column({ name: 'poll_count', type: 'int' })
-  pollCount: number;
-
-  @ViewColumn()
-  @Column({ name: 'movie_poster', type: 'text' })
-  moviePoster: string;
-
-  @ViewColumn()
-  @Column({ name: 'country', type: 'character varying', length: 2 })
+  @ViewColumn({ name: 'country' })
   country: string;
 
-  @ViewColumn()
-  @Column({ name: 'before_price', type: 'numeric' })
+  @ViewColumn({ name: 'before_price' })
   beforePrice: number;
 
-  @ViewColumn()
-  @Column({ name: 'after_price', type: 'numeric' })
+  @ViewColumn({ name: 'after_price' })
   afterPrice: number;
 
-  @ViewColumn()
-  @Column({ name: 'before_date', type: 'date' })
+  @ViewColumn({ name: 'before_date' })
   beforeDate: Date;
 
-  @ViewColumn()
-  @Column({ name: 'after_date', type: 'date' })
+  @ViewColumn({ name: 'after_date' })
   afterDate: Date;
+
+  @ViewColumn({ name: 'up_polls' })
+  upPolls: number;
+
+  @ViewColumn({ name: 'down_polls' })
+  downPolls: number;
+
+  @ViewColumn({ name: 'poll_count' })
+  pollCount: number;
+
+  @ViewColumn({ name: 'movie_poster' })
+  moviePoster: string;
 }

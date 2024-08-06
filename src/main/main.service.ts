@@ -1,9 +1,10 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { MainMovieView } from './entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
+import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
 
 @Injectable()
 export class MainService {
@@ -96,25 +97,44 @@ export class MainService {
     }
   }
 
-  async getPopularMoviesPolled(): Promise<any> {
+  // TODO: response에 대한 type 추가, Promise<any> => Promise<type>
+  async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
     try {
-      const movieList = await this.popularMoviePolledRepository.find();
-      return {
-        movieList: movieList.map((movie) => ({
-          movieId: movie.movieId,
-          movieTitle: movie.movieTitle,
-          posterUrl: movie.moviePoster,
-          countryCode: movie.country,
-          beforePrice: movie.beforePrice,
-          afterPrice: movie.afterPrice,
-          beforePriceDate: movie.beforeDate,
-          afterPriceDate: movie.afterDate,
-          up: movie.upPolls,
-          down: movie.downPolls,
-          pollCount: movie.pollCount,
-        })),
-        movieListCount: movieList.length,
-      };
+      // 투표 마감 영화 검색 최대 갯수
+      const POPULAR_MOVIE_POLLED_COUNT = 5;
+
+      const queryBuilder: SelectQueryBuilder<PopularMoviePolledView> =
+        this.popularMoviePolledRepository
+          .createQueryBuilder('p')
+          .orderBy('p.movieOpenDate', 'DESC')
+          .limit(POPULAR_MOVIE_POLLED_COUNT);
+
+      const movies = await queryBuilder.getMany();
+
+      console.log('Query Reulst : ', movies);
+
+      // BUG, TODO: up, down, price 등은 number 타입인데 왜 json 응답 값에서는 string 타입인가?
+      const movieList = movies.map((movie) => ({
+        movieId: Number(movie.movieId),
+        posterUrl: String(movie.moviePoster),
+        movieTitle: String(movie.movieTitle),
+        up:
+          movie.pollCount && movie.upPolls !== null
+            ? Number(((movie.upPolls / movie.pollCount) * 100).toFixed(2))
+            : 0,
+        down:
+          movie.pollCount && movie.downPolls !== null
+            ? Number(((movie.downPolls / movie.pollCount) * 100).toFixed(2))
+            : 0,
+
+        countryCode: String(movie.country),
+        beforePrice: Number(movie.beforePrice),
+        afterPrice: Number(movie.afterPrice),
+        beforePriceDate: new Date(movie.beforeDate).toISOString(),
+        afterPriceDate: new Date(movie.afterDate).toISOString(),
+      }));
+
+      return { movieList: movieList, movieListCount: movieList.length };
     } catch (err) {
       console.error('Error fetching popular polled movies:', err);
       throw new HttpException(

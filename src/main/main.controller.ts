@@ -91,13 +91,19 @@ export class MainController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
   // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생
-  async popularPollingMovies(@Query('poll') poll: string, @Req() req: Request) {
-    const userId = req.user ? req.user.id : null;
-    if (poll === 'true') {
-      return this.mainService.getPopularMoviesPolling(userId);
-    } else {
-      // return this.mainService.getPopularMoviesPolled(userId);
-      return this.mainService.getPopularMoviesPolled();
+  async popularPollingMovies(@Query('poll') poll: string, @Req() req: any) {
+    try {
+      const userId = req.user ? req.user.id : null;
+      if (poll === 'true') {
+        return await this.mainService.getPopularMoviesPolling(userId);
+      } else if (poll === 'false') {
+        return await this.mainService.getPopularMoviesPolled();
+      } else {
+        throw new Error('Invalid poll query parameter');
+      }
+    } catch (err) {
+      console.error('Error in popularPollingMovies:', err);
+      throw err;
     }
   }
 }
