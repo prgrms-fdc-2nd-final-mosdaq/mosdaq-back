@@ -7,6 +7,9 @@ import { MainMovieView } from './main/entities/main-movie-view.entity';
 import { MainModule } from './main/main.module';
 import { MovieQuizModule } from './movie-quiz/movie-quiz.module';
 import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
+import { UsersModel } from './users/entities/users.entity';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -22,13 +25,15 @@ import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
-        entities: [MainMovieView, MovieQuiz],
+        entities: [MainMovieView, UsersModel, MovieQuiz],
         synchronize: false,
       }),
       inject: [ConfigService],
     }),
     MainModule,
     MovieQuizModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

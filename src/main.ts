@@ -5,7 +5,10 @@ import { setupSwagger } from './util/swagger/setupSwagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors(); //cors 허용
+  app.enableCors({
+    origin: 'http://localhost:5173', // 허용할 도메인
+    credentials: true, // 자격 증명(쿠키, 인증 헤더 등) 사용
+  });
 
   setupSwagger(app);
 
