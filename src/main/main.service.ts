@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MainMovieView } from './entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
+import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 
 @Injectable()
 export class MainService {
@@ -11,6 +12,8 @@ export class MainService {
     private mainMovieRepository: Repository<MainMovieView>,
     @InjectRepository(PopularMoviePollingView)
     private popularMoviePollingRepository: Repository<PopularMoviePollingView>,
+    @InjectRepository(PopularMoviePolledView)
+    private popularMoviePolledRepository: Repository<PopularMoviePolledView>,
   ) {}
 
   async getMainMovies(): Promise<any> {
@@ -39,7 +42,7 @@ export class MainService {
     }
   }
 
-  async getPopularMoviePollings(userId: number | null): Promise<any> {
+  async getPopularMoviesPolling(userId: number | null): Promise<any> {
     try {
       const queryBuilder = this.popularMoviePollingRepository
         .createQueryBuilder('pmv')
@@ -65,6 +68,8 @@ export class MainService {
       // TODO: queryBuilder.getRawMany() 이후 movietitle 처럼 camelCase로 안나오는 이슈 해결
       const movieList = await queryBuilder.getRawMany();
 
+      console.log('# Query Result : ', movieList);
+
       return {
         movieList: movieList.map((movie) => ({
           movieId: parseInt(movie.movieid, 10),
@@ -86,6 +91,34 @@ export class MainService {
       console.error('Error fetching popular polling movies:', err);
       throw new HttpException(
         '투표 중인 가장 투표가 많은 영화 5개를 가져오는데 실패 하였습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getPopularMoviesPolled(): Promise<any> {
+    try {
+      const movieList = await this.popularMoviePolledRepository.find();
+      return {
+        movieList: movieList.map((movie) => ({
+          movieId: movie.movieId,
+          movieTitle: movie.movieTitle,
+          posterUrl: movie.moviePoster,
+          countryCode: movie.country,
+          beforePrice: movie.beforePrice,
+          afterPrice: movie.afterPrice,
+          beforePriceDate: movie.beforeDate,
+          afterPriceDate: movie.afterDate,
+          up: movie.upPolls,
+          down: movie.downPolls,
+          pollCount: movie.pollCount,
+        })),
+        movieListCount: movieList.length,
+      };
+    } catch (err) {
+      console.error('Error fetching popular polled movies:', err);
+      throw new HttpException(
+        '투표 중인 영화 목록을 가져오는데 실패 하였습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
