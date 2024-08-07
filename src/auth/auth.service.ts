@@ -19,7 +19,8 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
-    this.oauthClient = new OAuth2Client(clientId);
+    const clientSecret = this.configService.get<string>('GOOGLE_CLIENT_SECRET');
+    this.oauthClient = new OAuth2Client(clientId, clientSecret, 'postmessage');
   }
 
   async findUserByEmailOrSave(email: string, name: string, providerId: string) {
@@ -36,14 +37,14 @@ export class AuthService {
 
   async validateGoogleOAuthDto(googleOAuthDto: GoogleOAuthDto) {
     try {
-      const { token } = googleOAuthDto;
-
-      // Google 토큰 검증
+      // 구글 code(dto : token) 검증
+      const { tokens } = await this.oauthClient.getToken(googleOAuthDto.token);
+      // Google id 토큰 검증
       const ticket = await this.oauthClient.verifyIdToken({
-        idToken: token,
+        idToken: tokens.id_token,
         audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
       });
-
+      // decode 유저 정보 반환
       return ticket.getPayload();
     } catch {
       // TODO:

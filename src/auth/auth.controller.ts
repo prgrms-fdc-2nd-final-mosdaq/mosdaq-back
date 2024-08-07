@@ -11,22 +11,13 @@ import { UseGuards } from '@nestjs/common';
 import { Response } from '@nestjs/common';
 import { RefreshAuthTokenDto } from './dto/refreshAuthToken.dto';
 import { AccessTokenGuard } from './accessToken.guard';
-import { OAuth2Client } from 'google-auth-library';
-import { ConfigService } from '@nestjs/config';
 import { GoogleOAuthDto } from './dto/googleOAuth.dto';
 import { GoogleAuthGuard } from './auth.guard';
 import { Request } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
-  private oauthClient: OAuth2Client;
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService,
-  ) {
-    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
-    this.oauthClient = new OAuth2Client(clientId);
-  }
+  constructor(private readonly authService: AuthService) {}
   /*
   // 백엔드 api 설계 중 토큰이 필요할 때 사용
   @Get('to-google')
@@ -64,8 +55,8 @@ export class AuthController {
       payload.sub,
     );
 
-    const tokens = await this.authService.getTokens(user);
-    res.json(tokens);
+    const myTokens = await this.authService.getTokens(user);
+    res.json(myTokens);
   }
 
   @Post('refresh')
