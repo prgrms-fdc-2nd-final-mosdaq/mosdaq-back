@@ -10,11 +10,11 @@ import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-respo
 export class MainService {
   constructor(
     @InjectRepository(MainMovieView)
-    private mainMovieRepository: Repository<MainMovieView>,
+    private readonly mainMovieRepository: Repository<MainMovieView>,
     @InjectRepository(PopularMoviePollingView)
-    private popularMoviePollingRepository: Repository<PopularMoviePollingView>,
+    private readonly popularMoviePollingRepository: Repository<PopularMoviePollingView>,
     @InjectRepository(PopularMoviePolledView)
-    private popularMoviePolledRepository: Repository<PopularMoviePolledView>,
+    private readonly popularMoviePolledRepository: Repository<PopularMoviePolledView>,
   ) {}
 
   async getMainMovies(): Promise<any> {
@@ -25,7 +25,7 @@ export class MainService {
           movieId: movie.movie_id,
           movieTitle: movie.movie_title,
           posterUrl: movie.movie_poster,
-          countryCode: movie.country,
+          countryCode: movie.country.trim(),
           beforePrice: movie.before_price,
           afterPrice: movie.after_price,
           beforePriceDate: movie.before_date,
@@ -127,7 +127,7 @@ export class MainService {
             ? Number(((movie.downPolls / movie.pollCount) * 100).toFixed(2))
             : 0,
 
-        countryCode: String(movie.country),
+        countryCode: String(movie.country.trim()),
         beforePrice: Number(movie.beforePrice),
         afterPrice: Number(movie.afterPrice),
         beforePriceDate: new Date(movie.beforeDate).toISOString(),

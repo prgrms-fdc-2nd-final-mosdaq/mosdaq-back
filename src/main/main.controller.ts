@@ -3,7 +3,7 @@ import { MainService } from './main.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('api/v1/main-movie')
-@ApiTags('대표 영화 api')
+@ApiTags('메인 페이지 영화 api')
 export class MainController {
   constructor(private readonly mainService: MainService) {}
 
