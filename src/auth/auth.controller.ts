@@ -14,7 +14,15 @@ import { AccessTokenGuard } from './accessToken.guard';
 import { GoogleOAuthDto } from './dto/googleOAuth.dto';
 import { GoogleAuthGuard } from './auth.guard';
 import { Request } from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { TokenRefreshResponse } from './dto/tokenRefreshResponse.dto';
 
+@ApiTags('auth 관련')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -60,6 +68,14 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @ApiOperation({
+    summary: 'access 토큰 재발급 API',
+    description: 'refresh 토큰 검증으로 access 토큰을 재발급 받을 수 있습니다.',
+  })
+  @ApiCreatedResponse({
+    description: '새로운 access 토큰, refresh 토큰 발급',
+    type: TokenRefreshResponse,
+  })
   @UsePipes(new ValidationPipe())
   async refreshAuthToken(@Body() refreshAuthTokenDto: RefreshAuthTokenDto) {
     const userId: number = await this.authService.getUserIdFromToken(
