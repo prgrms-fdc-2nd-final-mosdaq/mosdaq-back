@@ -7,6 +7,11 @@ import { MainMovieView } from './main/entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './main/entities/popular-movie-polling-view.entity';
 import { PopularMoviePolledView } from './main/entities/popular-movie-polled-view.entity';
 import { MainModule } from './main/main.module';
+import { MovieQuizModule } from './movie-quiz/movie-quiz.module';
+import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
+import { UsersModel } from './users/entities/users.entity';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -23,6 +28,8 @@ import { MainModule } from './main/main.module';
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
         entities: [
+          UsersModel,
+          MovieQuiz,
           MainMovieView,
           PopularMoviePollingView,
           PopularMoviePolledView,
@@ -32,6 +39,9 @@ import { MainModule } from './main/main.module';
       inject: [ConfigService],
     }),
     MainModule,
+    MovieQuizModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
