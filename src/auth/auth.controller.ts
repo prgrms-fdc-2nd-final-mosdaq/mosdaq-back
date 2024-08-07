@@ -32,6 +32,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // 백엔드 api 설계 중 토큰이 필요할 때 사용
+  /*
   @Get('to-google')
   @UseGuards(GoogleAuthGuard)
   async googleAuth(@Request() req) {}
@@ -45,12 +46,12 @@ export class AuthController {
 
     res.json(tokens);
   }
-
+*/
   /*
   @Post('google')
   ->  구글 OAuth 로그인 프론트 엔드 엔드포인트
    백엔드 테스트 시 주석처리
-  
+  */
   @Post('google')
   @ApiOperation({
     summary: '구글 OAuth 로그인 API',
@@ -72,17 +73,17 @@ export class AuthController {
   ): Promise<TokenResponse> {
     const payload =
       await this.authService.validateGoogleOAuthDto(googleOAuthDto);
-
+    console.log(payload);
     const user = await this.authService.findUserByEmailOrSave(
       payload.email,
-      payload.family_name + payload.given_name,
+      payload.name,
       payload.sub,
     );
 
     const myTokens = await this.authService.getTokens(user);
     return myTokens;
   }
-*/
+
   @Post('refresh')
   @ApiOperation({
     summary: 'access 토큰 재발급 API',
@@ -143,8 +144,10 @@ export class AuthController {
       'refreshToken should not be empty,refreshToken must be a string.',
   })
   @ApiUnauthorizedResponse({
-    description:
-      '유효하지 않은 토큰입니다. 다시 로그인 하십시오 | 인증 토큰이 없습니다.',
+    description: '인증 토큰이 없습니다.',
+  })
+  @ApiForbiddenResponse({
+    description: '유효하지 않은 토큰입니다. 다시 로그인 하십시오.',
   })
   @ApiNotFoundResponse({
     description: '요청하신 정보를 찾을 수 없습니다.',
