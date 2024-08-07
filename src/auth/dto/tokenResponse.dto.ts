@@ -1,13 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class TokenRefreshResponse {
+export class TokenResponse {
   @ApiProperty({
     description: 'refresh 토큰',
     type: String,
   })
   @IsString()
-  @IsNotEmpty()
   refreshToken: string;
 
   @ApiProperty({
@@ -15,6 +14,5 @@ export class TokenRefreshResponse {
     type: String,
   })
   @IsString()
-  @IsNotEmpty()
   accessToken: string;
 }
