@@ -17,6 +17,7 @@ export class MainService {
     private readonly popularMoviePolledRepository: Repository<PopularMoviePolledView>,
   ) {}
 
+  // TODO: Promise<any> => Promise<DTO>
   async getMainMovies(): Promise<any> {
     try {
       const movieList = await this.mainMovieRepository.find();
@@ -97,7 +98,7 @@ export class MainService {
     }
   }
 
-  // TODO: response에 대한 type 추가, Promise<any> => Promise<type>
+  // TODO: response에 대한 type 추가, Promise<any> => Promise<DTO>
   async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
     try {
       // 투표 마감 영화 검색 최대 갯수
