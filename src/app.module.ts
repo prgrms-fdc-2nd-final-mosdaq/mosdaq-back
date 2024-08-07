@@ -6,6 +6,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MainMovieView } from './main/entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './main/entities/popular-movie-polling-view.entity';
 import { MainModule } from './main/main.module';
+import { MovieQuizModule } from './movie-quiz/movie-quiz.module';
+import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
+import { UsersModel } from './users/entities/users.entity';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -21,12 +26,15 @@ import { MainModule } from './main/main.module';
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
-        entities: [MainMovieView, PopularMoviePollingView],
+        entities: [UsersModel, MovieQuiz, MainMovieView, PopularMoviePollingView],
         synchronize: false,
       }),
       inject: [ConfigService],
     }),
     MainModule,
+    MovieQuizModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
