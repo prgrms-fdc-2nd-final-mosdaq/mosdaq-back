@@ -30,7 +30,7 @@ import { TokenResponse } from './dto/tokenResponse.dto';
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  /*
+
   // 백엔드 api 설계 중 토큰이 필요할 때 사용
   @Get('to-google')
   @UseGuards(GoogleAuthGuard)
@@ -45,12 +45,12 @@ export class AuthController {
 
     res.json(tokens);
   }
-*/
+
   /*
   @Post('google')
   ->  구글 OAuth 로그인 프론트 엔드 엔드포인트
    백엔드 테스트 시 주석처리
-  */
+  
   @Post('google')
   @ApiOperation({
     summary: '구글 OAuth 로그인 API',
@@ -82,7 +82,7 @@ export class AuthController {
     const myTokens = await this.authService.getTokens(user);
     return myTokens;
   }
-
+*/
   @Post('refresh')
   @ApiOperation({
     summary: 'access 토큰 재발급 API',

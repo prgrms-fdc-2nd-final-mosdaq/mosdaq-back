@@ -2,7 +2,6 @@ import { Body, Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AccessTokenGuard } from 'src/auth/accessToken.guard';
 import {
-  ApiBadRequestResponse,
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -41,7 +40,7 @@ export class UsersController {
   })
   @UseGuards(AccessTokenGuard)
   async getUserInfo(@Request() req): Promise<UserInfo> {
-    const user = await this.userService.findUserById(req.user.id);
+    const user = await this.userService.findUserById(req.user.sub);
 
     return {
       name: user.name,
