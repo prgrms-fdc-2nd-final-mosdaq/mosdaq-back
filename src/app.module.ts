@@ -12,6 +12,7 @@ import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
 import { UsersModel } from './users/entities/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { MovieDetailModule } from './movie-detail/movie-detail.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { UsersModule } from './users/users.module';
     MovieQuizModule,
     AuthModule,
     UsersModule,
+    MovieDetailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,16 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.enableCors({
-    // TODO: origin 주소 config로 관리
-    origin: 'http://localhost:5173', // 허용할 도메인
-    credentials: true, // 자격 증명(쿠키, 인증 헤더 등) 사용
-  });
-
   setupSwagger(app);
 
   const corsOptions = {
     origin: configService.get<string>('CORS_ORIGIN') || 'http://localhost:5173',
+    credentials: true,
   };
 
   app.enableCors(corsOptions);
