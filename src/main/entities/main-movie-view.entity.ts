@@ -31,6 +31,5 @@ export class MainMovieView {
   movie_poster: string;
 
   @ViewColumn()
-  @Column({ type: 'char', length: 3 })
   country: string;
 }

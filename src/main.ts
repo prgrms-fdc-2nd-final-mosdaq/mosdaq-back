@@ -8,6 +8,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.enableCors({
+    // TODO: origin 주소 config로 관리
     origin: 'http://localhost:5173', // 허용할 도메인
     credentials: true, // 자격 증명(쿠키, 인증 헤더 등) 사용
   });

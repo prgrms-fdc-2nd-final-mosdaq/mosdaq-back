@@ -46,7 +46,7 @@ export class UsersController {
       name: user.name,
       email: user.email,
       point: user.point,
-      rank: 10,
+      rank: 10, // TODO: rank 계산되도록 변경
     };
   }
 }
