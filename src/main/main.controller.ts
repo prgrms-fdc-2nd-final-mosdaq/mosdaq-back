@@ -1,6 +1,13 @@
 import { Controller, Get, Query, Req } from '@nestjs/common';
 import { MainService } from './main.service';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiOkResponse,
+  ApiNotFoundResponse,
+  ApiInternalServerErrorResponse,
+} from '@nestjs/swagger';
 
 @Controller('api/v1/main-movie')
 @ApiTags('메인 페이지 영화 api')
@@ -13,8 +20,7 @@ export class MainController {
     description:
       '대표 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터 요청',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description:
       '서비스 운영자가 선정한 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터와 함께 반환합니다.',
     schema: {
@@ -40,8 +46,10 @@ export class MainController {
       },
     },
   })
-  @ApiResponse({
-    status: 500,
+  @ApiNotFoundResponse({
+    description: '요청하신 정보를 찾을 수 없습니다.',
+  })
+  @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
   async mainMovie() {
@@ -61,8 +69,7 @@ export class MainController {
     type: 'string',
     description: '투표 활성화 여부 (true)',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: '성공적으로 투표 중인 영화 목록을 반환했습니다.',
     schema: {
       type: 'object',
@@ -86,8 +93,10 @@ export class MainController {
       },
     },
   })
-  @ApiResponse({
-    status: 500,
+  @ApiNotFoundResponse({
+    description: '요청하신 정보를 찾을 수 없습니다.',
+  })
+  @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
   // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생

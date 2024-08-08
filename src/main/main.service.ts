@@ -5,6 +5,7 @@ import { MainMovieView } from './entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class MainService {
@@ -78,10 +79,15 @@ export class MainService {
           movieTitle: movie.movietitle,
           posterUrl: movie.posterurl,
           up: parseInt(movie.pollcount, 10)
-            ? (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100
+            ? Math.round(
+                (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100,
+              )
             : 0,
           down: parseInt(movie.pollcount, 10)
-            ? (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) * 100
+            ? Math.round(
+                (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) *
+                  100,
+              )
             : 0,
           pollCount: parseInt(movie.pollcount, 10) || 0,
           myPollResult: userId ? movie.mypollresult : null,
@@ -98,7 +104,87 @@ export class MainService {
     }
   }
 
-  // TODO: response에 대한 type 추가, Promise<any> => Promise<DTO>
+  async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
+    try {
+      const POPULAR_MOVIE_POLLED_COUNT = 5;
+
+      const queryBuilder = this.popularMoviePolledRepository
+        .createQueryBuilder('p')
+        .select([
+          'p.movieId AS movieId',
+          'p.moviePoster AS moviePoster',
+          'p.movieTitle AS movieTitle',
+          'COALESCE(p.upPolls, 0) AS upPolls',
+          'COALESCE(p.downPolls, 0) AS downPolls',
+          'COALESCE(p.pollCount, 0) AS pollCount',
+          'p.country AS country',
+          'p.beforePrice AS beforePrice',
+          'p.afterPrice AS afterPrice',
+          'p.beforeDate AS beforeDate',
+          'p.afterDate AS afterDate',
+        ])
+        .orderBy('p.movieOpenDate', 'DESC')
+        .limit(POPULAR_MOVIE_POLLED_COUNT);
+
+      // const queryBuilder = this.popularMoviePolledRepository
+      //   .createQueryBuilder('p')
+      //   .select([
+      //     'p.movieId',
+      //     'p.moviePoster',
+      //     'p.movieTitle',
+      //     'COALESCE(p.upPolls, 0) AS upPolls',
+      //     'COALESCE(p.downPolls, 0) AS downPolls',
+      //     'COALESCE(p.pollCount, 0) AS pollCount',
+      //     'p.country AS country',
+      //     'p.beforePrice',
+      //     'p.afterPrice',
+      //     'p.beforeDate',
+      //     'p.afterDate',
+      //   ])
+      //   .orderBy('p.movieOpenDate', 'DESC')
+      //   .limit(POPULAR_MOVIE_POLLED_COUNT);
+
+      // const queryBuilder: SelectQueryBuilder<PopularMoviePolledView> =
+      //   this.popularMoviePolledRepository
+      //     .createQueryBuilder('p')
+      //     .orderBy('p.movieOpenDate', 'DESC')
+      //     .limit(POPULAR_MOVIE_POLLED_COUNT);
+
+      // const movies = await queryBuilder.getRawMany();
+      const movies = await queryBuilder.getMany();
+
+      console.log('Query Result : ', movies);
+
+      const movieList = movies.map((movie) => ({
+        movieId: Number(movie.movieid),
+        posterUrl: String(movie.movieposter),
+        movieTitle: String(movie.movietitle),
+        up:
+          movie.pollcount && movie.uppolls !== null
+            ? Math.round(Number((movie.uppolls / movie.pollcount) * 100))
+            : 0,
+        down:
+          movie.pollcount && movie.downpolls !== null
+            ? Math.round(Number((movie.downpolls / movie.pollcount) * 100))
+            : 0,
+        countryCode: String(movie.country),
+        beforePrice: Number(movie.beforeprice),
+        afterPrice: Number(movie.afterprice),
+        beforePriceDate: format(new Date(movie.beforedate), 'yyyy-MM-dd'),
+        afterPriceDate: format(new Date(movie.afterdate), 'yyyy-MM-dd'),
+      }));
+
+      return { movieList, movieListCount: movieList.length };
+    } catch (err) {
+      console.error('Error fetching popular polled movies:', err);
+      throw new HttpException(
+        '투표 중인 영화 목록을 가져오는데 실패 하였습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /*
   async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
     try {
       // 투표 마감 영화 검색 최대 갯수
@@ -144,4 +230,5 @@ export class MainService {
       );
     }
   }
+  */
 }
