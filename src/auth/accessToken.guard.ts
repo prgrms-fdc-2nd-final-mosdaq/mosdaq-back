@@ -19,7 +19,7 @@ export class AccessTokenGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('인증 토큰이 없습니다.');
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -28,7 +28,7 @@ export class AccessTokenGuard implements CanActivate {
 
       request['user'] = payload;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
     return true;
   }

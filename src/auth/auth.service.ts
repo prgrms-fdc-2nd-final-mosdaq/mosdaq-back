@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -67,13 +68,13 @@ export class AuthService {
   async validateAndGetNewTokens(refreshToken: string, userId: number) {
     const user = await this.usersService.findUserById(userId);
     if (user.refresh_token !== refreshToken)
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         '유효하지 않은 토큰입니다. 다시 로그인 하십시오.',
       );
 
     const isExpired = await this.isTokenExpired(refreshToken);
     if (isExpired) {
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         '유효하지 않은 토큰입니다. 다시 로그인 하십시오.',
       );
     }
@@ -115,7 +116,9 @@ export class AuthService {
     } catch {
       // TODO:
       console.log('Error while checking token expired');
-      throw new BadRequestException();
+      throw new BadRequestException(
+        '토큰 검증 중 오류가 발생했습니다. 다시 시도하십시오.',
+      );
     }
   }
 
@@ -129,11 +132,11 @@ export class AuthService {
     } catch (error) {
       // TODO:
       if (error instanceof JsonWebTokenError) {
-        throw new UnauthorizedException(
+        throw new ForbiddenException(
           '유효하지 않은 토큰입니다. 다시 로그인 하십시오.',
         );
       } else {
-        throw new UnauthorizedException(
+        throw new BadRequestException(
           '토큰 검증 중 오류가 발생했습니다. 다시 시도하십시오.',
         );
       }
