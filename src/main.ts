@@ -8,7 +8,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // TODO: 프론트도 AWS 배포 이후에는 cors 조건 한정시키는 것으로 변경!
-  const allowedOrigins = [];
+  const allowedOrigins = ['http://localhost:5173'];
 
   app.enableCors({
     origin: (origin, callback) => {
