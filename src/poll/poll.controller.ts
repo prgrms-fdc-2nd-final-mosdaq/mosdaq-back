@@ -1,15 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Controller, Get, Put, Body, Param, Headers } from '@nestjs/common';
 import { PollService } from './poll.service';
-import { CreatePollDto } from './dto/create-poll.dto';
-import { UpdatePollDto } from './dto/update-poll.dto';
+import { Repository } from 'typeorm';
+import { Poll } from './entities/poll.entity';
+import { UsersModel } from '../users/entities/users.entity';
 
-@Controller('poll')
+@Controller('api/v1/poll')
 export class PollController {
   constructor(private readonly pollService: PollService) {}
 
-  @Post()
-  create(@Body() createPollDto: CreatePollDto) {
-    return this.pollService.create(createPollDto);
+  @Put(':movieId')
+  create(
+    @Param('movieId') movieId: number,
+    @Headers('user-id') userId: number,
+    @Body('pollResult') pollResult: 'up' | 'down',
+  ) {
+    return this.pollService.poll(movieId, userId, pollResult);
   }
 
   @Get()
@@ -20,15 +31,5 @@ export class PollController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.pollService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto) {
-    return this.pollService.update(+id, updatePollDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pollService.remove(+id);
   }
 }
