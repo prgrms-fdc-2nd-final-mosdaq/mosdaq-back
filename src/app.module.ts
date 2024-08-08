@@ -11,6 +11,7 @@ import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
 import { UsersModel } from './users/entities/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { PollModule } from './poll/poll.module';
 
 @Module({
   imports: [
@@ -26,7 +27,12 @@ import { UsersModule } from './users/users.module';
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
-        entities: [UsersModel, MovieQuiz, MainMovieView, PopularMoviePollingView],
+        entities: [
+          UsersModel,
+          MovieQuiz,
+          MainMovieView,
+          PopularMoviePollingView,
+        ],
         synchronize: false,
       }),
       inject: [ConfigService],
@@ -35,6 +41,7 @@ import { UsersModule } from './users/users.module';
     MovieQuizModule,
     AuthModule,
     UsersModule,
+    PollModule,
   ],
   controllers: [AppController],
   providers: [AppService],
