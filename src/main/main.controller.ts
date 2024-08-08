@@ -1,16 +1,9 @@
 import { Controller, Get, Query, Req } from '@nestjs/common';
 import { MainService } from './main.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiQuery,
-  ApiOkResponse,
-  ApiNotFoundResponse,
-  ApiInternalServerErrorResponse,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 @Controller('api/v1/main-movie')
-@ApiTags('메인 페이지 영화 api')
+@ApiTags('대표 영화 api')
 export class MainController {
   constructor(private readonly mainService: MainService) {}
 
@@ -20,7 +13,8 @@ export class MainController {
     description:
       '대표 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터 요청',
   })
-  @ApiOkResponse({
+  @ApiResponse({
+    status: 200,
     description:
       '서비스 운영자가 선정한 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터와 함께 반환합니다.',
     schema: {
@@ -46,10 +40,8 @@ export class MainController {
       },
     },
   })
-  @ApiNotFoundResponse({
-    description: '요청하신 정보를 찾을 수 없습니다.',
-  })
-  @ApiInternalServerErrorResponse({
+  @ApiResponse({
+    status: 500,
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
   async mainMovie() {
@@ -69,7 +61,8 @@ export class MainController {
     type: 'string',
     description: '투표 활성화 여부 (true)',
   })
-  @ApiOkResponse({
+  @ApiResponse({
+    status: 200,
     description: '성공적으로 투표 중인 영화 목록을 반환했습니다.',
     schema: {
       type: 'object',
@@ -93,26 +86,15 @@ export class MainController {
       },
     },
   })
-  @ApiNotFoundResponse({
-    description: '요청하신 정보를 찾을 수 없습니다.',
-  })
-  @ApiInternalServerErrorResponse({
+  @ApiResponse({
+    status: 500,
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
   // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생
   async popularPollingMovies(@Query('poll') poll: string, @Req() req: any) {
-    try {
-      const userId = req.user ? req.user.id : null;
-      if (poll === 'true') {
-        return await this.mainService.getPopularMoviesPolling(userId);
-      } else if (poll === 'false') {
-        return await this.mainService.getPopularMoviesPolled();
-      } else {
-        throw new Error('Invalid poll query parameter');
-      }
-    } catch (err) {
-      console.error('Error in popularPollingMovies:', err);
-      throw err;
+    const userId = req.user ? req.user.id : null;
+    if (poll === 'true') {
+      return this.mainService.getPopularMoviePollings(userId);
     }
   }
 }

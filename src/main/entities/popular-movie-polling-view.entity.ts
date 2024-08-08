@@ -15,10 +15,6 @@ export class PopularMoviePollingView {
   movieOpenDate: Date;
 
   @ViewColumn()
-  @Column({ name: 'movie_poster', type: 'text' })
-  moviePoster: string;
-
-  @ViewColumn()
   @Column({ name: 'up_polls', type: 'int' })
   upPolls: number;
 
@@ -29,4 +25,8 @@ export class PopularMoviePollingView {
   @ViewColumn()
   @Column({ name: 'poll_count', type: 'int' })
   pollCount: number;
+
+  @ViewColumn()
+  @Column({ name: 'movie_poster', type: 'text' })
+  moviePoster: string;
 }

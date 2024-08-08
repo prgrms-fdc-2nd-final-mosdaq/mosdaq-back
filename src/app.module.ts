@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MainMovieView } from './main/entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './main/entities/popular-movie-polling-view.entity';
-import { PopularMoviePolledView } from './main/entities/popular-movie-polled-view.entity';
 import { MainModule } from './main/main.module';
 import { MovieQuizModule } from './movie-quiz/movie-quiz.module';
 import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
@@ -27,13 +26,7 @@ import { UsersModule } from './users/users.module';
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
-        entities: [
-          UsersModel,
-          MovieQuiz,
-          MainMovieView,
-          PopularMoviePollingView,
-          PopularMoviePolledView,
-        ],
+        entities: [UsersModel, MovieQuiz, MainMovieView, PopularMoviePollingView],
         synchronize: false,
       }),
       inject: [ConfigService],
