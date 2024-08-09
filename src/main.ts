@@ -7,19 +7,21 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // TODO: 프론트도 AWS 배포 이후에는 cors 조건 한정시키는 것으로 변경!
+  const allowedOrigins = ['http://localhost:5173'];
+
   app.enableCors({
-    // TODO: origin 주소 config로 관리
-    origin: 'http://localhost:5173', // 허용할 도메인
-    credentials: true, // 자격 증명(쿠키, 인증 헤더 등) 사용
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin); // 요청 도메인을 Access-Control-Allow-Origin 헤더에 설정
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true, // 자격 증명 허용
   });
 
   setupSwagger(app);
-
-  const corsOptions = {
-    origin: configService.get<string>('CORS_ORIGIN') || 'http://localhost:5173',
-  };
-
-  app.enableCors(corsOptions);
 
   // TODO: config/configuration.ts로 처리
   await app.listen(configService.get<number>('PORT') || 3000);
