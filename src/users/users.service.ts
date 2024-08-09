@@ -1,13 +1,11 @@
 import {
   Injectable,
-  HttpException,
-  HttpStatus,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
 import { UsersModel } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
@@ -101,6 +99,29 @@ export class UsersService {
     } catch {
       // TODO:
       console.log('Error while delete refresh token by user_id');
+      throw new BadRequestException();
+    }
+  }
+
+  async getUserInfo(userId: number) {
+    try {
+      const user = await this.findUserById(userId);
+      const totalUsers = await this.userRepository.count();
+      const higherPointUsers = await this.userRepository.count({
+        where: { point: MoreThan(user.point) },
+      });
+
+      const percentile = Math.floor(
+        ((higherPointUsers + 1) / totalUsers) * 100,
+      );
+
+      return {
+        ...user,
+        rank: percentile,
+      };
+    } catch {
+      // TODO:
+      console.log('Error select user table in getUserInfo service');
       throw new BadRequestException();
     }
   }

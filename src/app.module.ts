@@ -11,11 +11,7 @@ import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
 import { UsersModel } from './users/entities/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-<<<<<<< HEAD
 import { PollModule } from './poll/poll.module';
-=======
-import { MovieDetailModule } from './movie-detail/movie-detail.module';
->>>>>>> 6b683574ab4a833c0c29a56ecbed184ad791a62d
 
 @Module({
   imports: [

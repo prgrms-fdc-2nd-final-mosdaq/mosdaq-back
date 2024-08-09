@@ -1,4 +1,4 @@
-import { Body, Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AccessTokenGuard } from 'src/auth/accessToken.guard';
 import {
@@ -40,13 +40,12 @@ export class UsersController {
   })
   @UseGuards(AccessTokenGuard)
   async getUserInfo(@Request() req): Promise<UserInfo> {
-    const user = await this.userService.findUserById(req.user.sub);
-
+    const userInfo = await this.userService.getUserInfo(req.user.sub);
     return {
-      name: user.name,
-      email: user.email,
-      point: user.point,
-      rank: 10,
+      name: userInfo.name,
+      email: userInfo.email,
+      point: userInfo.point,
+      rank: userInfo.rank,
     };
   }
 }
