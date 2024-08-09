@@ -24,7 +24,7 @@ export class UserInfo {
   point: number;
 
   @ApiProperty({
-    description: '랭크',
+    description: '상위 n%',
     type: Number,
   })
   @IsNumber()
