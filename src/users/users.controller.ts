@@ -40,13 +40,12 @@ export class UsersController {
   })
   @UseGuards(AccessTokenGuard)
   async getUserInfo(@Request() req): Promise<UserInfo> {
-    const user = await this.userService.findUserById(req.user.sub);
-
+    const userInfo = await this.userService.getUserInfo(req.user.sub);
     return {
-      name: user.name,
-      email: user.email,
-      point: user.point,
-      rank: 10, // TODO: rank 계산되도록 변경
+      name: userInfo.name,
+      email: userInfo.email,
+      point: userInfo.point,
+      rank: userInfo.rank,
     };
   }
 }
