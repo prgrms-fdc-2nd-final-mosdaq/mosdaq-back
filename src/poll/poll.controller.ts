@@ -1,11 +1,14 @@
 import {
-  // BadRequestException,
+  BadRequestException,
+  Request,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
-import { Controller, Put, Body, Param, Headers } from '@nestjs/common';
+import { Controller, Put, Body, Param } from '@nestjs/common';
 import { PollService } from './poll.service';
 import {
+  ApiBody,
   ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -14,7 +17,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AccessTokenGuard } from 'src/auth/accessToken.guard';
-import { DoPollDto } from './dto/do-poll.dto';
+import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 // import { Repository } from 'typeorm';
 // import { Poll } from './entities/poll.entity';
 
@@ -34,9 +37,17 @@ export class PollController {
     required: true,
     example: 'Bearer your_token_here',
   })
+  @ApiBody({
+    description: '어디에 투표했는지 "up" | "down" 문자열 값으로 요청합니다',
+    schema: {
+      properties: {
+        pollResult: { type: 'string' },
+      },
+    },
+  })
   @ApiOkResponse({
     description: '유저 정보',
-    type: DoPollDto,
+    type: DoPollResponseDto,
   })
   @ApiUnauthorizedResponse({
     description:
@@ -48,9 +59,25 @@ export class PollController {
   @UseGuards(AccessTokenGuard)
   async poll(
     @Param('movieId') movieId: number,
-    @Headers('user-id') userId: number,
+    // TODO: ValidationPipe 별도 로직으로 분리
+    // @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    // doPollDto: DoPollDto,
     @Body('pollResult') pollResult: 'up' | 'down',
-  ): Promise<DoPollDto> {
-    return this.pollService.poll(movieId, userId, pollResult);
+    @Request() req,
+  ): Promise<DoPollResponseDto> {
+    const userId: number = req.user.sub;
+    const doPollDto: DoPollDto = { movieId, userId, pollResult };
+
+    if (!doPollDto.pollResult) {
+      throw new BadRequestException(
+        'pollResult는 "up" 또는 "down"이어야 합니다.',
+      );
+    }
+
+    doPollDto.userId = userId;
+    doPollDto.movieId = movieId;
+
+    console.log('doPollDto : ', doPollDto);
+    return this.pollService.poll(doPollDto);
   }
 }

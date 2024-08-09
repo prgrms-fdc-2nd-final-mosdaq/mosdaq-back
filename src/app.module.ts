@@ -12,6 +12,8 @@ import { UsersModel } from './users/entities/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PollModule } from './poll/poll.module';
+import { Poll } from './poll/entities/poll.entity';
+import { Movie } from './poll/entities/movie.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { PollModule } from './poll/poll.module';
         database: configService.get<string>('POSTGRES_DB'),
         entities: [
           UsersModel,
+          Poll,
+          Movie,
           MovieQuiz,
           MainMovieView,
           PopularMoviePollingView,

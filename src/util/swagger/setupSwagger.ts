@@ -11,6 +11,7 @@ export function setupSwagger(app: INestApplication): void {
     .setTitle('Mosdaq API Docs')
     .setDescription('Mosdaq API description')
     .setVersion('1.0.0')
+    .addBearerAuth() // Enable Bearer token authentication
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
