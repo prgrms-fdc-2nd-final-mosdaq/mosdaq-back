@@ -1,32 +1,25 @@
-import { ViewEntity, ViewColumn, Column } from 'typeorm';
+import { ViewEntity, ViewColumn } from 'typeorm';
 
 @ViewEntity('popular_movie_polling_view')
 export class PopularMoviePollingView {
-  @ViewColumn()
-  @Column({ name: 'movie_id', type: 'int' })
+  @ViewColumn({ name: 'movie_id' })
   movieId: number;
 
-  @ViewColumn()
-  @Column({ name: 'movie_title', type: 'character varying', length: 150 })
+  @ViewColumn({ name: 'movie_title' })
   movieTitle: string;
 
-  @ViewColumn()
-  @Column({ name: 'movie_open_date', type: 'date' })
+  @ViewColumn({ name: 'movie_open_date' })
   movieOpenDate: Date;
 
-  @ViewColumn()
-  @Column({ name: 'movie_poster', type: 'text' })
+  @ViewColumn({ name: 'movie_poster' })
   moviePoster: string;
 
-  @ViewColumn()
-  @Column({ name: 'up_polls', type: 'int' })
+  @ViewColumn({ name: 'up_polls' })
   upPolls: number;
 
-  @ViewColumn()
-  @Column({ name: 'down_polls', type: 'int' })
+  @ViewColumn({ name: 'down_polls' })
   downPolls: number;
 
-  @ViewColumn()
-  @Column({ name: 'poll_count', type: 'int' })
+  @ViewColumn({ name: 'poll_count' })
   pollCount: number;
 }
