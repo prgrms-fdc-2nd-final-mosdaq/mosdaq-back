@@ -34,6 +34,7 @@ export class PollService {
    *      user테이블의 point를 update 한다.
    * 3.user테이블에서 point와 rank 정보를 가져온다.
    */
+  // TODO: Transaction 처리 필요!!!, 어느 범위까지 묶을 것인가?
   async poll(doPollDto: DoPollDto): Promise<DoPollResponseDto> {
     const { movieId, userId, pollResult } = doPollDto;
     console.log('movieId : ', movieId);
