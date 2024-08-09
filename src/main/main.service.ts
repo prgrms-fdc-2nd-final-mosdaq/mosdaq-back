@@ -24,14 +24,14 @@ export class MainService {
       const movieList = await this.mainMovieRepository.find();
       return {
         movieList: movieList.map((movie) => ({
-          movieId: movie.movie_id,
-          movieTitle: movie.movie_title,
-          posterUrl: movie.movie_poster,
+          movieId: movie.movieId,
+          movieTitle: movie.movieTitle,
+          posterUrl: movie.moviePoster,
           countryCode: movie.country.trim(),
-          beforePrice: movie.before_price,
-          afterPrice: movie.after_price,
-          beforePriceDate: movie.before_date,
-          afterPriceDate: movie.after_date,
+          beforePrice: movie.beforePrice,
+          afterPrice: movie.afterPrice,
+          beforePriceDate: movie.beforeDate,
+          afterPriceDate: movie.afterDate,
         })),
         movieListCount: movieList.length,
       };
