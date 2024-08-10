@@ -1,16 +1,10 @@
-import {
-  BadRequestException,
-  Request,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
+import { BadRequestException, Request, UseGuards } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
 import { Controller, Put, Body, Param } from '@nestjs/common';
 import { PollService } from './poll.service';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiHeader,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -26,13 +20,6 @@ import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 @Controller('api/v1/poll')
 export class PollController {
   constructor(private readonly pollService: PollService) {}
-
-  // @ApiHeader({
-  //   name: 'Authorization',
-  //   description: 'Bearer 토큰을 포함한 인증 헤더입니다.',
-  //   required: true,
-  //   example: 'Bearer your_token_here',
-  // })
 
   @ApiBearerAuth('access-token')
   @Put(':movieId')
