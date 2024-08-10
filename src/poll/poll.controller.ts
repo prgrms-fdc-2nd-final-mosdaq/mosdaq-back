@@ -8,6 +8,7 @@ import {
 import { Controller, Put, Body, Param } from '@nestjs/common';
 import { PollService } from './poll.service';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiHeader,
   ApiNotFoundResponse,
@@ -26,16 +27,18 @@ import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 export class PollController {
   constructor(private readonly pollService: PollService) {}
 
+  // @ApiHeader({
+  //   name: 'Authorization',
+  //   description: 'Bearer 토큰을 포함한 인증 헤더입니다.',
+  //   required: true,
+  //   example: 'Bearer your_token_here',
+  // })
+
+  @ApiBearerAuth('access-token')
   @Put(':movieId')
   @ApiOperation({
     summary: '투표하기 API',
     description: '영화가 개봉 4주 이후에 오를지, 내릴지에 대해 투표합니다.',
-  })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer 토큰을 포함한 인증 헤더입니다.',
-    required: true,
-    example: 'Bearer your_token_here',
   })
   @ApiBody({
     description: '어디에 투표했는지 "up" | "down" 문자열 값으로 요청합니다',
