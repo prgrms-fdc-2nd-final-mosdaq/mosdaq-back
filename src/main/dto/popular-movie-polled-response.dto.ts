@@ -10,10 +10,10 @@ export class PopularMoviePolledMovieDto {
   @IsNumber()
   movieId: number;
 
-  @ApiProperty({ description: '영화 포스터의 URL' })
+  @ApiProperty({ description: '영화 포스터의 URL 리스트' })
   @Expose()
-  @IsString()
-  posterUrl: string;
+  @IsArray()
+  posterUrl: string[];
 
   @ApiProperty({ description: '영화 제목' })
   @Expose()

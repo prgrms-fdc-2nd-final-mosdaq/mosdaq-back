@@ -1,35 +1,28 @@
-import { ViewEntity, ViewColumn, Column } from 'typeorm';
+import { ViewEntity, ViewColumn } from 'typeorm';
 
 @ViewEntity({ name: 'main_movie_view' })
 export class MainMovieView {
-  @ViewColumn()
-  @Column({ type: 'int' })
-  movie_id: number;
+  @ViewColumn({ name: 'movie_id' })
+  movieId: number;
 
-  @ViewColumn()
-  @Column({ type: 'character varying', length: 150 })
-  movie_title: string;
+  @ViewColumn({ name: 'movie_title' })
+  movieTitle: string;
 
-  @ViewColumn()
-  @Column({ type: 'numeric' })
-  before_price: number;
+  @ViewColumn({ name: 'before_price' })
+  beforePrice: number;
 
-  @ViewColumn()
-  @Column({ type: 'numeric' })
-  after_price: number;
+  @ViewColumn({ name: 'after_price' })
+  afterPrice: number;
 
-  @ViewColumn()
-  @Column({ type: 'date' })
-  before_date: Date;
+  @ViewColumn({ name: 'before_date' })
+  beforeDate: Date;
 
-  @ViewColumn()
-  @Column({ type: 'date' })
-  after_date: Date;
+  @ViewColumn({ name: 'after_date' })
+  afterDate: Date;
 
-  @ViewColumn()
-  @Column({ type: 'text' })
-  movie_poster: string;
+  @ViewColumn({ name: 'movie_poster' })
+  moviePoster: string;
 
-  @ViewColumn()
+  @ViewColumn({ name: 'country' })
   country: string;
 }
