@@ -1,26 +1,22 @@
 import { Injectable } from '@nestjs/common';
-// import { CreateMovieListDto } from './dto/create-movie-list.dto';
-// import { UpdateMovieListDto } from './dto/update-movie-list.dto';
+import { PollingMovieListDto } from './dto/polling-movie-list-response.dto';
 
 @Injectable()
 export class MovieListService {
-  // create(createMovieListDto: CreateMovieListDto) {
-  //   return 'This action adds a new movieList';
-  // }
-
-  findAll() {
-    return `This action returns all movieList`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} movieList`;
-  }
-
-  // update(id: number, updateMovieListDto: UpdateMovieListDto) {
-  //   return `This action updates a #${id} movieList`;
-  // }
-
-  remove(id: number) {
-    return `This action removes a #${id} movieList`;
+  async getPollingMovies(): Promise<PollingMovieListDto> {
+    return {
+      movieList: [
+        {
+          movieId: 0,
+          movieTitle: 'parasite',
+          posterUrl: ['some', 'someblah'],
+          up: 0,
+          down: 0,
+          myPollResult: null,
+        },
+      ],
+      movieListCount: 0,
+      pagination: 0,
+    };
   }
 }

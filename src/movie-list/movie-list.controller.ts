@@ -51,10 +51,10 @@ export class MovieListController {
   @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
-  pollMovieList(@Query('poll') poll: string, @Req() req: unknown) {
+  async pollMovieList(@Query('poll') poll: string, @Req() req: unknown) {
     try {
       if (poll === 'true') {
-        return '/api/v1/movie/list?poll=true';
+        return this.movieListService.getPollingMovies();
       } else if (poll === 'false') {
         return '/api/v1/movie/list?poll=false';
       } else {
