@@ -9,8 +9,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PollingMovieListDto } from './dto/polling-movie-list-response.dto';
-import { SWAGGER_BAD_REQUERST_CONTENT } from 'src/constants';
-import { SWAGGER_INTERNAL_SERVER_ERROR_CONTENT } from 'src/constants/swagger.constants';
+import {
+  SWAGGER_BAD_REQUERST_CONTENT,
+  SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
+} from 'src/constants';
 
 @Controller('api/v1/movie/list')
 @ApiTags('영화 투표 목록 api')
