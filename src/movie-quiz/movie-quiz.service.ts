@@ -30,12 +30,11 @@ export class MovieQuizService {
       .orderBy('RANDOM()')
       .limit(dto.count)
       .getRawMany();
-
     return quizzes.map((quiz) => ({
       movieTitle: quiz.movie_title,
       moviePoster: quiz.movie_poster,
-      fourWeeksBeforePrice: +quiz.movie_stock_four_weeks_before_price,
-      fourWeeksAfterPrice: +quiz.movie_stock_four_weeks_after_price,
+      fourWeeksBeforePrice: +quiz.four_weeks_before_price,
+      fourWeeksAfterPrice: +quiz.four_weeks_after_price,
     }));
   }
 }
