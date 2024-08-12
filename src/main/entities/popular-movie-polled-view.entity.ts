@@ -28,7 +28,6 @@ export class PopularMoviePolledView {
 
   @ViewColumn({ name: 'up_polls' })
   upPolls: number;
-
   @ViewColumn({ name: 'down_polls' })
   downPolls: number;
 

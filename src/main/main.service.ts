@@ -11,14 +11,15 @@ import { format } from 'date-fns';
 export class MainService {
   constructor(
     @InjectRepository(MainMovieView)
-    private readonly mainMovieRepository: Repository<MainMovieView>,
+    private mainMovieRepository: Repository<MainMovieView>,
+
     @InjectRepository(PopularMoviePollingView)
-    private readonly popularMoviePollingRepository: Repository<PopularMoviePollingView>,
+    private popularMoviePollingRepository: Repository<PopularMoviePollingView>,
+
     @InjectRepository(PopularMoviePolledView)
     private readonly popularMoviePolledRepository: Repository<PopularMoviePolledView>,
   ) {}
 
-  // TODO: Promise<any> => Promise<DTO>
   async getMainMovies(): Promise<any> {
     try {
       const movieList = await this.mainMovieRepository.find();
@@ -77,15 +78,10 @@ export class MainService {
           movieTitle: movie.movietitle,
           posterUrl: movie.posterurl.split('|'),
           up: parseInt(movie.pollcount, 10)
-            ? Math.round(
-                (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100,
-              )
+            ? (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100
             : 0,
           down: parseInt(movie.pollcount, 10)
-            ? Math.round(
-                (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) *
-                  100,
-              )
+            ? (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) * 100
             : 0,
           pollCount: parseInt(movie.pollcount, 10) || 0,
           myPollResult: userId ? movie.mypollresult : null,
