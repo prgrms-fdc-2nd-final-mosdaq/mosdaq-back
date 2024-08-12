@@ -1,18 +1,23 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { MainMovieView } from './entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class MainService {
   constructor(
     @InjectRepository(MainMovieView)
     private mainMovieRepository: Repository<MainMovieView>,
+
     @InjectRepository(PopularMoviePollingView)
     private popularMoviePollingRepository: Repository<PopularMoviePollingView>,
+
+    @InjectRepository(PopularMoviePolledView)
+    private readonly popularMoviePolledRepository: Repository<PopularMoviePolledView>,
   ) {}
 
   async getMainMovies(): Promise<any> {
@@ -41,7 +46,7 @@ export class MainService {
     }
   }
 
-  async getPopularMoviePollings(userId: number | null): Promise<any> {
+  async getPopularMoviesPolling(userId: number | null): Promise<any> {
     try {
       const queryBuilder = this.popularMoviePollingRepository
         .createQueryBuilder('pmv')

@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MainMovieView } from './main/entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './main/entities/popular-movie-polling-view.entity';
+import { PopularMoviePolledView } from './main/entities/popular-movie-polled-view.entity';
 import { MainModule } from './main/main.module';
 import { MovieQuizModule } from './movie-quiz/movie-quiz.module';
 import { MovieQuiz } from './movie-quiz/entities/movie-quiz.entity';
@@ -36,6 +37,7 @@ import { Movie } from './poll/entities/movie.entity';
           MovieQuiz,
           MainMovieView,
           PopularMoviePollingView,
+          PopularMoviePolledView,
         ],
         synchronize: false,
       }),
