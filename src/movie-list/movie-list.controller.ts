@@ -19,9 +19,10 @@ export class MovieListController {
   @Get('/')
   @ApiQuery({
     name: 'poll',
-    required: false,
+    required: true,
     description: '투표 결과 필터링 여부',
   })
+  // required 조건 고려
   @ApiQuery({ name: 'offset', required: false, description: '결과의 오프셋' })
   @ApiQuery({ name: 'limit', required: false, description: '결과의 제한 수' })
   @ApiQuery({
@@ -36,12 +37,13 @@ export class MovieListController {
       \n 페이지네이션과 개봉일 기준 오름차순, 내림차순 정렬 등의 조건을 \
       query param을 통해 설정 할 수 있다.',
   })
-  // TODO: schema는 별도 파일로 모듈화
+  // TODO: schema vs type: DTO 어느 방식이 적절할지 조사
   @ApiOkResponse({
     description: '투표 중인 영화 목록을 제공한다.',
     type: PollingMovieListDto,
     isArray: true,
   })
+  // TODO: swagger 에러 문구 모듈화
   @ApiBadRequestResponse({
     description:
       '쿼리 파라미터 형식을 맞추어주세요.\
@@ -54,6 +56,7 @@ export class MovieListController {
       },
     },
   })
+  // TODO: swagger 에러 문구 모듈화
   @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: {
