@@ -57,6 +57,18 @@ export class MovieListController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
+  /** TODO:
+   * 1. pipe를 통한 query 파라미터에서 뽑아낸 데이터 검증
+   * 2. pipe에서 뽑은 데이터 service로 전달
+   * 3. service
+   *    - entity 명시
+   *    - entity 이용하여 DB에서 필요한 데이터 가져오기
+   * 4. service에서 응답 메시지 구성하여 return
+   * etc
+   * - controller
+   *   - req 파라미터 타입 명시
+   *   - response 타입 명시
+   */
   // TODO: response type 명시
   async pollMovieList(@Query('poll') poll: string, @Req() req: unknown) {
     try {
