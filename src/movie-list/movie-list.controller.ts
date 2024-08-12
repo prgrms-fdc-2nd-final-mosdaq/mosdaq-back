@@ -45,14 +45,12 @@ export class MovieListController {
     type: PollingMovieListDto,
     isArray: true,
   })
-  // TODO: swagger 에러 문구 모듈화
   @ApiBadRequestResponse({
     description:
       '쿼리 파라미터 형식을 맞추어주세요.\
       \n\n e.g) "/api/v1/movie/list?poll=true&offset=5&limit=1&sort=ASC"',
     content: SWAGGER_BAD_REQUERST_CONTENT,
   })
-  // TODO: swagger 에러 문구 모듈화
   @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
