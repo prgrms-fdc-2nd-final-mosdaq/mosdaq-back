@@ -1,24 +1,20 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository } from 'typeorm';
 import { MainMovieView } from './entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
-import { format } from 'date-fns';
 
 @Injectable()
 export class MainService {
   constructor(
     @InjectRepository(MainMovieView)
-    private readonly mainMovieRepository: Repository<MainMovieView>,
+    private mainMovieRepository: Repository<MainMovieView>,
     @InjectRepository(PopularMoviePollingView)
-    private readonly popularMoviePollingRepository: Repository<PopularMoviePollingView>,
-    @InjectRepository(PopularMoviePolledView)
-    private readonly popularMoviePolledRepository: Repository<PopularMoviePolledView>,
+    private popularMoviePollingRepository: Repository<PopularMoviePollingView>,
   ) {}
 
-  // TODO: Promise<any> => Promise<DTO>
   async getMainMovies(): Promise<any> {
     try {
       const movieList = await this.mainMovieRepository.find();
@@ -45,7 +41,7 @@ export class MainService {
     }
   }
 
-  async getPopularMoviesPolling(userId: number | null): Promise<any> {
+  async getPopularMoviePollings(userId: number | null): Promise<any> {
     try {
       const queryBuilder = this.popularMoviePollingRepository
         .createQueryBuilder('pmv')
@@ -77,15 +73,10 @@ export class MainService {
           movieTitle: movie.movietitle,
           posterUrl: movie.posterurl.split('|'),
           up: parseInt(movie.pollcount, 10)
-            ? Math.round(
-                (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100,
-              )
+            ? (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100
             : 0,
           down: parseInt(movie.pollcount, 10)
-            ? Math.round(
-                (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) *
-                  100,
-              )
+            ? (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) * 100
             : 0,
           pollCount: parseInt(movie.pollcount, 10) || 0,
           myPollResult: userId ? movie.mypollresult : null,
