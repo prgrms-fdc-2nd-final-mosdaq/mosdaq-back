@@ -30,9 +30,10 @@ export class MovieQuizService {
       .orderBy('RANDOM()')
       .limit(dto.count)
       .getRawMany();
+
     return quizzes.map((quiz) => ({
       movieTitle: quiz.movie_title,
-      moviePoster: quiz.movie_poster,
+      moviePoster: quiz.movie_poster.split('|'),
       fourWeeksBeforePrice: +quiz.four_weeks_before_price,
       fourWeeksAfterPrice: +quiz.four_weeks_after_price,
     }));
