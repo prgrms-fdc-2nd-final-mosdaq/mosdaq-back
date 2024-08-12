@@ -9,6 +9,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { PollingMovieListDto } from './dto/polling-movie-list-response.dto';
+import { SWAGGER_BAD_REQUERST_CONTENT } from 'src/constants';
+import { SWAGGER_INTERNAL_SERVER_ERROR_CONTENT } from 'src/constants/swagger.constants';
 
 @Controller('api/v1/movie/list')
 @ApiTags('영화 투표 목록 api')
@@ -48,24 +50,12 @@ export class MovieListController {
     description:
       '쿼리 파라미터 형식을 맞추어주세요.\
       \n\n e.g) "/api/v1/movie/list?poll=true&offset=5&limit=1&sort=ASC"',
-    content: {
-      'application/json': {
-        example: {
-          message: '잘못된 요청입니다.',
-        },
-      },
-    },
+    content: SWAGGER_BAD_REQUERST_CONTENT,
   })
   // TODO: swagger 에러 문구 모듈화
   @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
-    content: {
-      'application/json': {
-        example: {
-          message: '서버 내부 오류',
-        },
-      },
-    },
+    content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
   // TODO: response type 명시
   async pollMovieList(@Query('poll') poll: string, @Req() req: unknown) {
