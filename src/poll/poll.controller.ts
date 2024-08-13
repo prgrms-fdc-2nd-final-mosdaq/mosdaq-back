@@ -13,8 +13,6 @@ import {
 } from '@nestjs/swagger';
 import { AccessTokenGuard } from 'src/auth/accessToken.guard';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
-// import { Repository } from 'typeorm';
-// import { Poll } from './entities/poll.entity';
 
 @ApiTags('투표 관련')
 @Controller('api/v1/poll')
@@ -47,9 +45,9 @@ export class PollController {
     description: '요청하신 정보를 찾을 수 없습니다.',
   })
   @UseGuards(AccessTokenGuard)
+  // TODO: ValidationPipe 별도 로직으로 분리
   async poll(
     @Param('movieId') movieId: number,
-    // TODO: ValidationPipe 별도 로직으로 분리
     // @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     // doPollDto: DoPollDto,
     @Body('pollResult') pollResult: 'up' | 'down',

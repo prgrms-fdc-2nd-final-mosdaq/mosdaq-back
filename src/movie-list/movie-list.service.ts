@@ -3,7 +3,14 @@ import { PollingMovieListDto } from './dto/polling-movie-list-response.dto';
 
 @Injectable()
 export class MovieListService {
-  async getPollingMovies(): Promise<PollingMovieListDto> {
+  async getPollingMovies(
+    offset: number,
+    limit: number,
+    sort: 'DESC' | 'ASC',
+  ): Promise<PollingMovieListDto> {
+    console.log('offset : ', offset);
+    console.log('limit : ', limit);
+    console.log('sort : ', sort);
     return {
       movieList: [
         {

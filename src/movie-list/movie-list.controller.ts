@@ -1,4 +1,14 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseBoolPipe,
+  ParseIntPipe,
+  Query,
+  Req,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { MovieListService } from './movie-list.service';
 import {
   ApiBadRequestResponse,
@@ -68,16 +78,26 @@ export class MovieListController {
    * - controller
    *   - req 파라미터 타입 명시
    *   - response 타입 명시
+   * - exception
+   * - logger
    */
+  // /api/v1/movie/list?poll=true&offset={}&limit={}&sort={}
   // TODO: response type 명시
-  async pollMovieList(@Query('poll') poll: string, @Req() req: unknown) {
+  @UsePipes(ValidationPipe)
+  async pollMovieList(
+    @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
+    @Query('offset', new DefaultValuePipe(1), ParseIntPipe) offset: number,
+    @Query('limit', new DefaultValuePipe(30), ParseIntPipe) limit: number,
+    @Query('sort', new DefaultValuePipe('DESC'))
+    sort: 'DESC' | 'ASC',
+    @Req() req: unknown,
+  ) {
     try {
-      if (poll === 'true') {
+      if (poll === true) {
         // TODO: query 파라미터 검증, 데이터 뽑아내기
         // TODO: pagination, sorting
-        return this.movieListService.getPollingMovies();
-      } else if (poll === 'false') {
-        // TODO: 투표 마감된 영화 목록
+        return this.movieListService.getPollingMovies(offset, limit, sort);
+      } else if (poll === false) {
         return '/api/v1/movie/list?poll=false';
       } else {
         throw new Error('Invalid poll query parameter');
