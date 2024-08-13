@@ -1,6 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { MovieQuizService } from './movie-quiz.service';
-import { MovieQuiz } from './entities/movie-quiz.entity';
 import { GetMovieQuizDto } from './dto/get-movie-quiz.dto';
 import {
   ApiOperation,
@@ -25,7 +24,6 @@ export class MovieQuizController {
     description: '영화 제목, 4주전, 4주후의 주가 데이터를 제공합니다',
     schema: {
       type: 'array',
-
       items: {
         type: 'object',
         properties: {
