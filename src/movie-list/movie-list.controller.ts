@@ -84,19 +84,21 @@ export class MovieListController {
   // /api/v1/movie/list?poll=true&offset={}&limit={}&sort={}
   // TODO: response type 명시
   @UsePipes(ValidationPipe)
+  // TODO: query parameter 검증 로직, 커스텀으로 변경 및 자체 에러코드 설정
   async pollMovieList(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @Query('offset', new DefaultValuePipe(1), ParseIntPipe) offset: number,
     @Query('limit', new DefaultValuePipe(30), ParseIntPipe) limit: number,
     @Query('sort', new DefaultValuePipe('DESC'))
     sort: 'DESC' | 'ASC',
-    @Req() req: unknown,
+    @Req() request: Request,
   ) {
     try {
       if (poll === true) {
-        // TODO: query 파라미터 검증, 데이터 뽑아내기
+        // TODO: request header에서 token 뽑아내기
         // TODO: pagination, sorting
         return this.movieListService.getPollingMovies(offset, limit, sort);
+        // return this.movieListService.getPollingMovies(offset, limit, sort, 12);
       } else if (poll === false) {
         return '/api/v1/movie/list?poll=false';
       } else {

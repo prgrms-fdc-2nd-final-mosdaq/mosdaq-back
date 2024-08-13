@@ -7,10 +7,13 @@ export class MovieListService {
     offset: number,
     limit: number,
     sort: 'DESC' | 'ASC',
+    userId: number | null = null,
   ): Promise<PollingMovieListDto> {
     console.log('offset : ', offset);
     console.log('limit : ', limit);
     console.log('sort : ', sort);
+    console.log('userId : ', userId);
+
     return {
       movieList: [
         {
