@@ -97,7 +97,7 @@ export class MovieListController {
       if (poll === true) {
         // TODO: request header에서 token 뽑아내기
         return this.movieListService.getPollingMovies(offset, limit, sort);
-        // return this.movieListService.getPollingMovies(offset, limit, sort, 2);
+        // return this.movieListService.getPollingMovies(offset, limit, sort, 222);
       } else if (poll === false) {
         return '/api/v1/movie/list?poll=false';
       } else {
