@@ -15,6 +15,8 @@ import { UsersModule } from './users/users.module';
 import { PollModule } from './poll/poll.module';
 import { Poll } from './poll/entities/poll.entity';
 import { Movie } from './poll/entities/movie.entity';
+import { MovieDetailModule } from './movie-detail/movie-detail.module';
+import { MovieDetail } from './movie-detail/entities/movie-detail.entity';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { Movie } from './poll/entities/movie.entity';
           MainMovieView,
           PopularMoviePollingView,
           PopularMoviePolledView,
+          MovieDetail,
         ],
         synchronize: false,
       }),
@@ -48,6 +51,7 @@ import { Movie } from './poll/entities/movie.entity';
     AuthModule,
     UsersModule,
     PollModule,
+    MovieDetailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
