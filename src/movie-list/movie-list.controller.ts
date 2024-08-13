@@ -88,7 +88,7 @@ export class MovieListController {
   async pollMovieList(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @Query('offset', new DefaultValuePipe(1), ParseIntPipe) offset: number,
-    @Query('limit', new DefaultValuePipe(30), ParseIntPipe) limit: number,
+    @Query('limit', new DefaultValuePipe(1), ParseIntPipe) limit: number,
     @Query('sort', new DefaultValuePipe('DESC'))
     sort: 'DESC' | 'ASC',
     @Req() request: Request,
@@ -96,9 +96,8 @@ export class MovieListController {
     try {
       if (poll === true) {
         // TODO: request header에서 token 뽑아내기
-        // TODO: pagination, sorting
         return this.movieListService.getPollingMovies(offset, limit, sort);
-        // return this.movieListService.getPollingMovies(offset, limit, sort, 12);
+        // return this.movieListService.getPollingMovies(offset, limit, sort, 2);
       } else if (poll === false) {
         return '/api/v1/movie/list?poll=false';
       } else {
