@@ -23,6 +23,11 @@ import {
   SWAGGER_BAD_REQUERST_CONTENT,
   SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
 } from 'src/constants';
+import {
+  MOVIE_LIST_DEFAULT_LIMIT,
+  MOVIE_LIST_DEFAULT_OFFSET,
+  MOVIE_LIST_DEFAULT_SORT,
+} from 'src/constants/app.constants';
 
 @Controller('api/v1/movie/list')
 @ApiTags('영화 투표 목록 api')
@@ -36,7 +41,6 @@ export class MovieListController {
     required: true,
     description: '투표 결과 필터링 여부',
   })
-  // required 조건 고려
   @ApiQuery({ name: 'offset', required: false, description: '결과의 오프셋' })
   @ApiQuery({ name: 'limit', required: false, description: '결과의 제한 수' })
   @ApiQuery({
@@ -72,18 +76,29 @@ export class MovieListController {
   // TODO: 매직 넘버 상수 변수로 대체
   async pollMovieList(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
-    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
-    @Query('limit', new DefaultValuePipe(15), ParseIntPipe) limit: number,
-    @Query('sort', new DefaultValuePipe('DESC'))
+    @Query(
+      'offset',
+      new DefaultValuePipe(MOVIE_LIST_DEFAULT_OFFSET),
+      ParseIntPipe,
+    )
+    offset: number,
+    @Query(
+      'limit',
+      new DefaultValuePipe(MOVIE_LIST_DEFAULT_LIMIT),
+      ParseIntPipe,
+    )
+    limit: number,
+    @Query('sort', new DefaultValuePipe(MOVIE_LIST_DEFAULT_SORT))
     sort: 'DESC' | 'ASC',
     @Req() request: Request,
   ): Promise<PollMovieListResponseDto> {
     try {
       // TODO: request header에서 token 뽑아내기
-      const userId = null;
+      // const userId: number | null = null;
+      const userId: number | null = 22;
 
       if (poll === true) {
-        return this.movieListService.getPollingMovies(
+        return this.movieListService.getPollMovies(
           true,
           offset,
           limit,
@@ -91,7 +106,7 @@ export class MovieListController {
           userId,
         );
       } else if (poll === false) {
-        return this.movieListService.getPollingMovies(
+        return this.movieListService.getPollMovies(
           false,
           offset,
           limit,

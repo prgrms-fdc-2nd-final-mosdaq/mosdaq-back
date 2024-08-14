@@ -14,7 +14,7 @@ export class MovieListService {
     private readonly movieRepository: Repository<Movie>,
   ) {}
 
-  async getPollingMovies(
+  async getPollMovies(
     poll: boolean,
     offset: number,
     limit: number,
@@ -24,12 +24,13 @@ export class MovieListService {
     try {
       const dateComparison: string = poll ? '>' : '<';
 
+      // TODO: userID가 넘어오는 경우
       const movies = await this.movieRepository
         .createQueryBuilder('m')
         .leftJoinAndSelect(
           'm.polls',
           'p',
-          'p.movieId = m.movieId AND p.userId = :userId',
+          userId ? 'p.movieId = m.movieId AND p.userId = :userId' : '1=1',
           { userId },
         )
         .where(`m.movieOpenDate ${dateComparison} CURRENT_DATE`)
