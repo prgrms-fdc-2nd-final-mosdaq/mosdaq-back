@@ -5,15 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MovieDetail } from './entities/movie-detail.entity';
 import { Repository } from 'typeorm';
 import { MovieDetailDto } from './dto/movie-detail.dto';
+import { Movie } from 'src/poll/entities/movie.entity';
 
 @Injectable()
 export class MovieDetailService {
   constructor(
-    @InjectRepository(MovieDetail)
-    private readonly movieDetailRepository: Repository<MovieDetail>,
+    @InjectRepository(Movie)
+    private readonly movieDetailRepository: Repository<Movie>,
   ) {}
 
   async getMovieDetailById(movieId: number): Promise<MovieDetailDto> {
