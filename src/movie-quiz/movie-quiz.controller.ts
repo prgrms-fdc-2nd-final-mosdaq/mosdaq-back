@@ -1,6 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { MovieQuizService } from './movie-quiz.service';
-import { MovieQuiz } from './entities/movie-quiz.entity';
 import { GetMovieQuizDto } from './dto/get-movie-quiz.dto';
 import {
   ApiOperation,
@@ -11,28 +10,28 @@ import {
 } from '@nestjs/swagger';
 import { MovieQuizDto } from './dto/movie-quiz.dto';
 
-@Controller('api/v1/')
+@Controller('api/v1/movie/quiz')
 @ApiTags('영화 퀴즈 api')
 export class MovieQuizController {
   constructor(private readonly movieQuizService: MovieQuizService) {}
 
-  @Get('movie/quiz')
+  @Get('/')
   @ApiOperation({
     summary: '영화 퀴즈 목록 제공 API',
-    description: '랜덤한 영화 퀴즈 데이터 제공 (default count 값 = 10)',
+    description: '랜덤한 영화 퀴즈 데이터 제공 (일단 default count 값 = 10)',
   })
   @ApiOkResponse({
-    description: '영화 제목, 4주전, 4주후의 주가 데이터를 제공합니다',
+    description: '영화 제목,포스터,통화,4주전,4주후의 주가 데이터를 제공합니다',
     schema: {
       type: 'array',
-
       items: {
         type: 'object',
         properties: {
           movieTitle: { type: 'string' },
-          moviePoster: { type: 'string' },
+          moviePoster: { type: 'array', items: { type: 'string' } },
           fourWeeksBeforePrice: { type: 'number' },
           fourWeeksAfterPrice: { type: 'number' },
+          currency: { type: 'string' },
         },
       },
     },

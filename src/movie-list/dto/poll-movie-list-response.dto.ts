@@ -1,34 +1,8 @@
-// 📄 src/movies/dto/popular-movies-polled-response.dto.ts
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsString,
-  IsArray,
-  IsISO8601,
-  IsOptional,
-  IsIn,
-} from 'class-validator';
+import { IsNumber, IsString, IsArray, IsOptional, IsIn } from 'class-validator';
 
-// TO KNOW: Expose, Exclude 특징과 차이점 언제 쓰는가
-/**
-{
-	 movieList : [
-		 {
-			 movieId : number
-			 movieTitle : string
-			 posterUrl : string[]
-			 up : number // 화면에는 퍼센트로 표시
-			 down : number // 화면에는 퍼센트로 표시
-			 myPollResult?: string // "up" || "down"
-		 }
-		 ...
-	 ]
-	 movieListCount: number
-	 pagination : number
-}
- */
-export class PollingMovieDto {
+export class PollMovieDto {
   @ApiProperty({ description: '영화의 고유 식별자' })
   @Expose()
   @IsNumber()
@@ -62,14 +36,26 @@ export class PollingMovieDto {
   myPollResult?: 'up' | 'down' | null;
 }
 
-export class PollingMovieListDto {
+class moviePaginationDto {
+  @ApiProperty({ description: '현재 페이지 번호' })
+  @Expose()
+  @IsNumber()
+  currentPage: number;
+
+  @ApiProperty({ description: '전체 페이지 수' })
+  @Expose()
+  @IsNumber()
+  totalPages: number;
+}
+
+export class PollMovieListResponseDto {
   @ApiProperty({
-    type: [PollingMovieDto],
+    type: [PollMovieDto],
     description: '투표 중인 영화 목록',
   })
   @Expose()
   @IsArray()
-  movieList: PollingMovieDto[];
+  movieList: PollMovieDto[];
 
   @ApiProperty({ description: '목록에 있는 영화 수' })
   @Expose()
@@ -79,5 +65,5 @@ export class PollingMovieListDto {
   @ApiProperty({ description: '현재 페이지 번호' })
   @Expose()
   @IsNumber()
-  pagination: number;
+  pagination: moviePaginationDto;
 }

@@ -1,60 +1,87 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectEntityManager } from '@nestjs/typeorm';
-import { EntityManager } from 'typeorm';
-import { PollingMovieListDto } from './dto/polling-movie-list-response.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Movie } from '../poll/entities/movie.entity';
+import {
+  PollMovieDto,
+  PollMovieListResponseDto,
+} from './dto/poll-movie-list-response.dto';
 
 @Injectable()
 export class MovieListService {
   constructor(
-    @InjectEntityManager() private readonly entityManager: EntityManager,
+    @InjectRepository(Movie)
+    private readonly movieRepository: Repository<Movie>,
   ) {}
 
   async getPollingMovies(
+    poll: boolean,
     offset: number,
     limit: number,
     sort: 'DESC' | 'ASC',
     userId: number | null = null,
-  ): Promise<PollingMovieListDto> {
+  ): Promise<PollMovieListResponseDto> {
     try {
-      const result = await this.entityManager.query(
-        `
-        SELECT 
-        m.movie_id AS "movieId", 
-        m.movie_title AS "movieTitle", 
-        m.movie_poster AS "posterUrl",
-        COUNT(CASE WHEN p.poll_flag THEN 1 END) AS "up",
-        COUNT(CASE WHEN NOT p.poll_flag THEN 1 END) AS "down",
-        CASE
-        WHEN p.poll_flag IS TRUE THEN 'up'
-        WHEN p.poll_flag IS FALSE THEN 'down'
-        ELSE NULL
-        END AS "myPollResult"
-        FROM 
-        movie m
-        LEFT JOIN 
-        poll p ON m.movie_id = p.fk_movie_id AND p.fk_user_id = $1
-        WHERE 
-        m.movie_open_date > CURRENT_DATE
-        GROUP BY 
-        m.movie_id, m.movie_title, m.movie_poster, m.movie_open_date, p.poll_flag
-        ORDER BY 
-        m.movie_open_date ${sort}
-        OFFSET $2 LIMIT $3
-        `,
-        [userId, offset, limit],
-      );
+      const dateComparison: string = poll ? '>' : '<';
+
+      const movies = await this.movieRepository
+        .createQueryBuilder('m')
+        .leftJoinAndSelect(
+          'm.polls',
+          'p',
+          'p.movieId = m.movieId AND p.userId = :userId',
+          { userId },
+        )
+        .where(`m.movieOpenDate ${dateComparison} CURRENT_DATE`)
+        .orderBy('m.movieOpenDate', sort)
+        .skip(offset)
+        .take(limit)
+        .getMany();
+
+      const movieList: PollMovieDto[] = movies.map((movie) => {
+        const totalPolls = movie.polls.length;
+        const upPolls = movie.polls.filter((poll) => poll.pollFlag).length;
+        const downPolls = movie.polls.filter((poll) => !poll.pollFlag).length;
+
+        // 백분율 계산
+        const upPercentage =
+          totalPolls > 0 ? Math.round((upPolls / totalPolls) * 100) : 0;
+        const downPercentage =
+          totalPolls > 0 ? Math.round((downPolls / totalPolls) * 100) : 0;
+
+        const myPollResult =
+          movie.polls.length > 0
+            ? movie.polls[0].pollFlag
+              ? 'up'
+              : 'down'
+            : null;
+
+        return {
+          movieId: movie.movieId,
+          movieTitle: movie.movieTitle,
+          posterUrl: movie.moviePoster.split('|'),
+          up: upPercentage,
+          down: downPercentage,
+          myPollResult,
+        };
+      });
+
+      // 페이지네이션 계산
+      const totalMoviesCount = await this.movieRepository
+        .createQueryBuilder('m')
+        .where(`m.movieOpenDate ${dateComparison} CURRENT_DATE`)
+        .getCount();
+
+      const currentPage = Math.floor(offset / limit) + 1;
+      const totalPages = Math.ceil(totalMoviesCount / limit);
 
       return {
-        movieList: result.map((row) => ({
-          movieId: row.movieId,
-          movieTitle: row.movieTitle,
-          posterUrl: row.posterUrl,
-          up: parseInt(row.up, 10),
-          down: parseInt(row.down, 10),
-          myPollResult: row.myPollResult,
-        })),
-        movieListCount: result.length,
-        pagination: Math.ceil(result.length / limit),
+        movieList,
+        movieListCount: movieList.length,
+        pagination: {
+          currentPage,
+          totalPages,
+        },
       };
     } catch (err) {
       console.error('Error executing query:', err);

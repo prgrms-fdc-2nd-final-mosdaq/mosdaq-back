@@ -18,7 +18,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { PollingMovieListDto } from './dto/polling-movie-list-response.dto';
+import { PollMovieListResponseDto } from './dto/poll-movie-list-response.dto';
 import {
   SWAGGER_BAD_REQUERST_CONTENT,
   SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
@@ -54,7 +54,7 @@ export class MovieListController {
   // TODO: schema vs type: DTO 어느 방식이 적절할지 조사
   @ApiOkResponse({
     description: '투표 중인 영화 목록을 제공한다.',
-    type: PollingMovieListDto,
+    type: PollMovieListResponseDto,
     isArray: true,
   })
   @ApiBadRequestResponse({
@@ -67,43 +67,43 @@ export class MovieListController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
-  /** TODO:
-   * 1. pipe를 통한 query 파라미터에서 뽑아낸 데이터 검증
-   * 2. pipe에서 뽑은 데이터 service로 전달
-   * 3. service
-   *    - entity 명시
-   *    - entity 이용하여 DB에서 필요한 데이터 가져오기
-   * 4. service에서 응답 메시지 구성하여 return
-   * etc
-   * - controller
-   *   - req 파라미터 타입 명시
-   *   - response 타입 명시
-   * - exception
-   * - logger
-   */
-  // /api/v1/movie/list?poll=true&offset={}&limit={}&sort={}
-  // TODO: response type 명시
-  @UsePipes(ValidationPipe)
   // TODO: query parameter 검증 로직, 커스텀으로 변경 및 자체 에러코드 설정
+  @UsePipes(ValidationPipe)
+  // TODO: 매직 넘버 상수 변수로 대체
   async pollMovieList(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
-    @Query('offset', new DefaultValuePipe(1), ParseIntPipe) offset: number,
-    @Query('limit', new DefaultValuePipe(1), ParseIntPipe) limit: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    @Query('limit', new DefaultValuePipe(15), ParseIntPipe) limit: number,
     @Query('sort', new DefaultValuePipe('DESC'))
     sort: 'DESC' | 'ASC',
     @Req() request: Request,
-  ) {
+  ): Promise<PollMovieListResponseDto> {
     try {
+      // TODO: request header에서 token 뽑아내기
+      const userId = null;
+
       if (poll === true) {
-        // TODO: request header에서 token 뽑아내기
-        return this.movieListService.getPollingMovies(offset, limit, sort);
-        // return this.movieListService.getPollingMovies(offset, limit, sort, 222);
+        return this.movieListService.getPollingMovies(
+          true,
+          offset,
+          limit,
+          sort,
+          userId,
+        );
       } else if (poll === false) {
-        return '/api/v1/movie/list?poll=false';
+        return this.movieListService.getPollingMovies(
+          false,
+          offset,
+          limit,
+          sort,
+          userId,
+        );
       } else {
+        // TODO: 에러 헨들링
         throw new Error('Invalid poll query parameter');
       }
     } catch (err) {
+      // TODO: 에러 헨들링
       console.error('Error in /api/v1/movie/list?poll=true  : ', poll);
       throw err;
     }
