@@ -95,7 +95,7 @@ export class MovieListController {
     try {
       // TODO: request header에서 token 뽑아내기
       // const userId: number | null = null;
-      const userId: number | null = 22;
+      const userId: number | null = null;
 
       if (poll === true) {
         return this.movieListService.getPollMovies(

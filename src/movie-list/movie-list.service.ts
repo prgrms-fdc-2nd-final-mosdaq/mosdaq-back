@@ -19,25 +19,26 @@ export class MovieListService {
     offset: number,
     limit: number,
     sort: 'DESC' | 'ASC',
-    userId: number | null = null,
+    userId: number | null,
   ): Promise<PollMovieListResponseDto> {
     try {
       const dateComparison: string = poll ? '>' : '<';
 
-      // TODO: userID가 넘어오는 경우
-      const movies = await this.movieRepository
+      const queryBuilder = this.movieRepository
         .createQueryBuilder('m')
-        .leftJoinAndSelect(
-          'm.polls',
-          'p',
-          userId ? 'p.movieId = m.movieId AND p.userId = :userId' : '1=1',
-          { userId },
-        )
+        .leftJoinAndSelect('m.polls', 'p');
+
+      if (userId !== null) {
+        queryBuilder.andWhere('p.userId = :userId', { userId });
+      }
+
+      queryBuilder
         .where(`m.movieOpenDate ${dateComparison} CURRENT_DATE`)
         .orderBy('m.movieOpenDate', sort)
         .skip(offset)
-        .take(limit)
-        .getMany();
+        .take(limit);
+
+      const movies = await queryBuilder.getMany();
 
       const movieList: PollMovieDto[] = movies.map((movie) => {
         const totalPolls = movie.polls.length;
@@ -50,12 +51,9 @@ export class MovieListService {
         const downPercentage =
           totalPolls > 0 ? Math.round((downPolls / totalPolls) * 100) : 0;
 
-        const myPollResult =
-          movie.polls.length > 0
-            ? movie.polls[0].pollFlag
-              ? 'up'
-              : 'down'
-            : null;
+        // 나의 투표 결과를 찾아 설정 (userId가 존재하는 경우에만)
+        const myPoll = movie.polls.find((poll) => poll.userId === userId);
+        const myPollResult = myPoll ? (myPoll.pollFlag ? 'up' : 'down') : null;
 
         return {
           movieId: movie.movieId,
