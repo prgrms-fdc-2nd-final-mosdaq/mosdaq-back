@@ -1,6 +1,5 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { MovieQuizService } from './movie-quiz.service';
-import { MovieQuiz } from './entities/movie-quiz.entity';
 import { GetMovieQuizDto } from './dto/get-movie-quiz.dto';
 import {
   ApiOperation,
