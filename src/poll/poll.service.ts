@@ -10,6 +10,7 @@ import { UsersModel } from '../users/entities/users.entity';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { POLL_PARTICIPATION_POINTS } from 'src/constants';
 import { Movie } from './entities/movie.entity';
+import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
 
 // TODO: logger로 전환
 @Injectable()
@@ -113,6 +114,65 @@ export class PollService {
       );
       throw new InternalServerErrorException(
         '서버 오류로 인해 투표 처리가 실패했습니다.',
+      );
+    }
+  }
+
+  async getPollBoxByMovieId(
+    pollBoxDto: PollBoxDto,
+  ): Promise<PollBoxResponseDto> {
+    const movie = await this.movieRepository.findOne({
+      where: { movieId: pollBoxDto.id },
+    });
+    if (!movie) {
+      console.warn(
+        `유효하지 않은 영화 ID ${pollBoxDto.id}: 영화가 존재하지 않습니다.`,
+      );
+      throw new BadRequestException(
+        '유효하지 않은 영화 ID: 영화가 존재하지 않습니다.',
+      );
+    }
+
+    try {
+      const { id, userId } = pollBoxDto;
+
+      const totalUpCount = await this.pollRepository.count({
+        where: {
+          movieId: id,
+          pollFlag: true,
+        },
+      });
+
+      const totalDownCount = await this.pollRepository.count({
+        where: {
+          movieId: id,
+          pollFlag: false,
+        },
+      });
+
+      let pollResult: 'up' | 'down' | null = null;
+
+      if (userId) {
+        const isUserVoted = await this.pollRepository.findOne({
+          where: { userId, movieId: id },
+        });
+        if (isUserVoted) {
+          pollResult = isUserVoted.pollFlag ? 'up' : 'down';
+        }
+      }
+
+      const response: PollBoxResponseDto = {
+        total: totalUpCount + totalDownCount,
+        up: totalUpCount,
+        down: totalDownCount,
+        ...(userId && { pollResult }), // userId가 있는 경우에만 pollResult 포함
+      };
+
+      return response;
+    } catch (err) {
+      console.error(`투표함을 가져오지 못했습니다.`, err.stack);
+      throw new InternalServerErrorException(
+        '서버 오류로 인해 투표함을 가져오지 못했습니다.',
       );
     }
   }
