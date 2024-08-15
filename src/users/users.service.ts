@@ -6,7 +6,6 @@ import {
 import { UsersModel } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
-import { PollMovieListResponseDto } from 'src/movie-list/dto/poll-movie-list-response.dto';
 import {
   PollResult,
   UserPollMovieListResponseDto,
@@ -131,7 +130,6 @@ export class UsersService {
     }
   }
 
-  // (true, year, userId)
   async getUserPollingMovies(
     poll: boolean,
     year: number,
