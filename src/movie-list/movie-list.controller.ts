@@ -59,7 +59,6 @@ export class MovieListController {
   @ApiOkResponse({
     description: '투표 중인 영화 목록을 제공한다.',
     type: PollMovieListResponseDto,
-    isArray: true,
   })
   @ApiBadRequestResponse({
     description:
