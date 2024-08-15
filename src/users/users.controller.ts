@@ -27,6 +27,11 @@ import {
   SWAGGER_BAD_REQUERST_CONTENT,
   SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
 } from 'src/constants';
+import {
+  MOVIE_LIST_DEFAULT_LIMIT,
+  MOVIE_LIST_DEFAULT_OFFSET,
+  MOVIE_LIST_DEFAULT_SORT,
+} from 'src/constants/app.constants';
 
 @ApiTags('user 관련')
 @Controller('api/v1/users')
@@ -82,6 +87,13 @@ export class UsersController {
     description: '영화 개봉 연도',
     example: new Date().getFullYear(),
   })
+  @ApiQuery({ name: 'offset', required: false, description: '결과의 오프셋' })
+  @ApiQuery({ name: 'limit', required: false, description: '결과의 제한 수' })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: '정렬 순서 (ASC 또는 DESC)',
+  })
   @ApiOkResponse({
     description: '투표 중인 영화 목록을 제공한다.',
     type: UserPollMovieListResponseDto,
@@ -100,15 +112,43 @@ export class UsersController {
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @Query('year', new DefaultValuePipe(new Date().getFullYear()), ParseIntPipe)
     year: number,
+    @Query(
+      'offset',
+      new DefaultValuePipe(MOVIE_LIST_DEFAULT_OFFSET),
+      ParseIntPipe,
+    )
+    offset: number,
+    @Query(
+      'limit',
+      new DefaultValuePipe(MOVIE_LIST_DEFAULT_LIMIT),
+      ParseIntPipe,
+    )
+    limit: number,
+    @Query('sort', new DefaultValuePipe(MOVIE_LIST_DEFAULT_SORT))
+    sort: 'DESC' | 'ASC',
   ): Promise<UserPollMovieListResponseDto> {
     try {
       // TODO: request header에서 token 뽑아내기
       const userId: number | null = null;
 
       if (poll === true) {
-        return this.userService.getUserPollingMovies(true, year, userId);
+        return this.userService.getUserPollingMovies(
+          true,
+          year,
+          offset,
+          limit,
+          sort,
+          userId,
+        );
       } else if (poll === false) {
-        return this.userService.getUserPolledMovies(false, year, userId);
+        return this.userService.getUserPollingMovies(
+          false,
+          year,
+          offset,
+          limit,
+          sort,
+          userId,
+        );
       } else {
         // TODO: 에러 헨들링
         throw new Error('Invalid poll query parameter');

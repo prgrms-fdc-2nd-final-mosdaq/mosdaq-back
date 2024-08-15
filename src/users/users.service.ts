@@ -133,10 +133,16 @@ export class UsersService {
   async getUserPollingMovies(
     poll: boolean,
     year: number,
+    offset: number,
+    limit: number,
+    sort: 'DESC' | 'ASC',
     userId: number,
   ): Promise<UserPollMovieListResponseDto> {
     console.log(poll);
     console.log(year);
+    console.log(offset);
+    console.log(limit);
+    console.log(sort);
     console.log(userId);
 
     return {
@@ -186,10 +192,16 @@ export class UsersService {
   async getUserPolledMovies(
     poll: boolean,
     year: number,
+    offset: number,
+    limit: number,
+    sort: 'DESC' | 'ASC',
     userId: number,
   ): Promise<UserPollMovieListResponseDto> {
     console.log(poll);
     console.log(year);
+    console.log(offset);
+    console.log(limit);
+    console.log(sort);
     console.log(userId);
 
     return {

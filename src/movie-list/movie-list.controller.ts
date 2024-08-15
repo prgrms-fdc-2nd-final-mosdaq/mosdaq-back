@@ -36,6 +36,13 @@ export class MovieListController {
 
   // /api/v1/movie/list?poll=true&offset={}&limit={}&sort={}
   @Get('/')
+  @ApiOperation({
+    summary: '투표 중인 영화 목록 API',
+    description:
+      '투표 중인 영화 목록을 제공한다.\
+      \n 페이지네이션과 개봉일 기준 오름차순, 내림차순 정렬 등의 조건을 \
+      query param을 통해 설정 할 수 있다.',
+  })
   @ApiQuery({
     name: 'poll',
     required: true,
@@ -47,13 +54,6 @@ export class MovieListController {
     name: 'sort',
     required: false,
     description: '정렬 순서 (ASC 또는 DESC)',
-  })
-  @ApiOperation({
-    summary: '투표 중인 영화 목록 API',
-    description:
-      '투표 중인 영화 목록을 제공한다.\
-      \n 페이지네이션과 개봉일 기준 오름차순, 내림차순 정렬 등의 조건을 \
-      query param을 통해 설정 할 수 있다.',
   })
   // TODO: schema vs type: DTO 어느 방식이 적절할지 조사
   @ApiOkResponse({
