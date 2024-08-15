@@ -7,11 +7,36 @@ export class StocksController {
 
   @Get(':movieId')
   async getStockPriceByMovieId(@Param('movieId') movieId: string) {
-    // 없는 movieId -> 404
-    // 아니면 주가 정보 반환
-    console.log(movieId);
+    const movie = await this.stocksService.findMovieByMovieId(+movieId);
+    const company = await this.stocksService.findCompanyByCompanyCd(
+      movie.companyId,
+    );
 
-    const company = await this.stocksService.findCompanyByMovieId(+movieId);
-    return company;
+    const fourWeeksBeforeStock = await this.stocksService.getStockInfo(
+      movie.movieOpenDate,
+      company.tickerName,
+      true,
+    );
+
+    const fourWeeksAfterStock = await this.stocksService.getStockInfo(
+      movie.movieOpenDate,
+      company.tickerName,
+      false,
+    );
+
+    const averageStockVariation =
+      await this.stocksService.getAverageStockVariation(
+        fourWeeksBeforeStock.stockDate,
+        fourWeeksAfterStock.stockDate,
+        company.country,
+      );
+
+    return {
+      beforePriceDate: fourWeeksBeforeStock.stockDate,
+      beforePrice: parseFloat(fourWeeksBeforeStock.closePrice),
+      afterPriceDate: fourWeeksAfterStock.stockDate,
+      afterPrice: parseFloat(fourWeeksAfterStock.closePrice),
+      stockIndustryAverageVariation: parseFloat(averageStockVariation),
+    };
   }
 }

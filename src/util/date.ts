@@ -1,12 +1,12 @@
 import * as dayjs from 'dayjs';
 
-export const get4WeeksPrevPriceByOpenDate = (openDate: Date) => {
-  const fourWeeksAgo = dayjs(openDate).subtract(4, 'week');
+// isPast:true -> 4주 전, false -> 4주 후
+export const shiftDateByWeeks = (openDate: Date, isPast: boolean) => {
+  return isPast
+    ? new Date(dayjs(openDate).subtract(4, 'week').format('YYYY-MM-DD'))
+    : new Date(dayjs(openDate).add(4, 'week').format('YYYY-MM-DD'));
+};
 
-  const dates = [];
-  for (let i = 0; i < 7; i++) {
-    dates.push(fourWeeksAgo.add(i, 'day').format('YYYY-MM-DD'));
-  }
-
-  return dates;
+export const getYesterdayDate = (date: Date) => {
+  return new Date(dayjs(date).subtract(1, 'day').format('YYYY-MM-DD'));
 };
