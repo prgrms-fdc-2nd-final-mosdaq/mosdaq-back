@@ -141,7 +141,7 @@ export class UsersController {
           userId,
         );
       } else if (poll === false) {
-        return this.userService.getUserPollingMovies(
+        return this.userService.getUserPolledMovies(
           false,
           year,
           offset,
