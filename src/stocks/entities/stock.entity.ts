@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
-export class StocksModel {
+@Entity('stock')
+export class Stock {
   @PrimaryGeneratedColumn({ name: 'stock_id', type: 'integer' })
-  id: number;
+  stockId: number;
 
   @Column({ name: 'ticker_name', type: 'character varying' })
   tickerName: string;

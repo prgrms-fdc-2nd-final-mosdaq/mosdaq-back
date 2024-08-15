@@ -10,7 +10,8 @@ export class StocksController {
     // 없는 movieId -> 404
     // 아니면 주가 정보 반환
     console.log(movieId);
-    const movie = await this.stocksService.findMovieByMovieId(+movieId);
-    return movie;
+
+    const company = await this.stocksService.findCompanyByMovieId(+movieId);
+    return company;
   }
 }
