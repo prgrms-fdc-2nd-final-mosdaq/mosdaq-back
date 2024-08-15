@@ -16,7 +16,10 @@ import { PollModule } from './poll/poll.module';
 import { Poll } from './poll/entities/poll.entity';
 import { Movie } from './poll/entities/movie.entity';
 import { MovieListModule } from './movie-list/movie-list.module';
+import { StocksModule } from './stocks/stocks.module';
 import { MovieDetailModule } from './movie-detail/movie-detail.module';
+import { Company } from './stocks/entities/company.entity';
+import { Stock } from './stocks/entities/stock.entity';
 
 @Module({
   imports: [
@@ -40,6 +43,8 @@ import { MovieDetailModule } from './movie-detail/movie-detail.module';
           MainMovieView,
           PopularMoviePollingView,
           PopularMoviePolledView,
+          Company,
+          Stock,
         ],
         synchronize: false,
       }),
@@ -51,6 +56,7 @@ import { MovieDetailModule } from './movie-detail/movie-detail.module';
     UsersModule,
     PollModule,
     MovieListModule,
+    StocksModule,
     MovieDetailModule,
   ],
   controllers: [AppController],
