@@ -12,6 +12,8 @@ import {
   UserPollMovieListResponseDto,
 } from './dto/user-poll-movie-list-response.dto';
 import { Movie } from 'src/poll/entities/movie.entity';
+import { Stock } from 'src/stocks/entities/stock.entity';
+import { Company } from 'src/stocks/entities/company.entity';
 
 @Injectable()
 export class UsersService {
@@ -22,11 +24,11 @@ export class UsersService {
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
 
-    // @InjectRepository(Stock)
-    // private readonly stockRepository: Repository<Stock>,
+    @InjectRepository(Stock)
+    private readonly stockRepository: Repository<Stock>,
 
-    // @InjectRepository(Company)
-    // private readonly companyRepository: Repository<Company>,
+    @InjectRepository(Company)
+    private readonly companyRepository: Repository<Company>,
   ) {}
 
   async findUserByEmailOrSave(email: string, name: string, providerId: string) {
@@ -208,49 +210,53 @@ export class UsersService {
     sort: 'DESC' | 'ASC',
     userId: number | null,
   ): Promise<UserPollMovieListResponseDto> {
-    const query = this.movieRepository
-      .createQueryBuilder('m')
-      .select([
-        'm.movie_id AS "movieId"',
-        'm.movie_title AS "movieTitle"',
-        'array_agg(m.movie_poster) AS "posterUrl"',
-        `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up"`,
-        `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down"`,
-        `COALESCE((
+    const query = `
+      SELECT 
+        m.movie_id AS "movieId",
+        m.movie_title AS "movieTitle",
+        array_agg(m.movie_poster) AS "posterUrl",
+        (SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up",
+        (SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down",
+        COALESCE((
           SELECT CASE WHEN p.poll_flag = true THEN 'up' ELSE 'down' END
           FROM poll p
-          WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = :userId
-        ), NULL) AS "pollResult"`,
-        'c.country AS "countryCode"',
-        'c.company_name AS "companyName"',
-        'bs.close_price AS "beforePrice"',
-        'bs.stock_date AS "beforePriceDate"',
-        'as.close_price AS "afterPrice"',
-        'as.stock_date AS "afterPriceDate"',
-      ])
-      .leftJoin('company', 'c', 'm.fk_company_id = c.company_cd')
-      .leftJoin(
-        'stock',
-        'bs',
-        'bs.ticker_name = c.ticker_name AND bs.stock_date = (SELECT MAX(stock_date) FROM stock WHERE ticker_name = c.ticker_name AND stock_date < CURRENT_DATE)',
-      )
-      .leftJoin(
-        'stock',
-        'as',
-        'as.ticker_name = c.ticker_name AND as.stock_date = CURRENT_DATE',
-      )
-      .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
-      .andWhere('m.movie_open_date < CURRENT_DATE')
-      .groupBy(
-        'm.movie_id, c.country, c.company_name, bs.close_price, bs.stock_date, as.close_price, as.stock_date',
-      )
-      .orderBy('m.movie_id', sort)
-      .offset(offset)
-      .limit(limit)
-      .setParameter('userId', userId)
-      .getRawMany();
+          WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = $1
+        ), NULL) AS "pollResult",
+        c.country AS "countryCode",
+        c.company_name AS "companyName",
+        bs.close_price AS "beforePrice",
+        bs.stock_date AS "beforePriceDate",
+        cs.close_price AS "afterPrice",
+        cs.stock_date AS "afterPriceDate"
+      FROM 
+        movie m
+      LEFT JOIN 
+        company c ON m.fk_company_id = c.company_cd
+      LEFT JOIN 
+        stock bs ON bs.ticker_name = c.ticker_name AND bs.stock_date = (
+          SELECT MAX(stock_date) 
+          FROM stock 
+          WHERE ticker_name = c.ticker_name AND stock_date < CURRENT_DATE
+        )
+      LEFT JOIN 
+        stock cs ON cs.ticker_name = c.ticker_name AND cs.stock_date = CURRENT_DATE
+      WHERE 
+        EXTRACT(YEAR FROM m.movie_open_date) = $2
+        AND m.movie_open_date < CURRENT_DATE
+      GROUP BY 
+        m.movie_id, c.country, c.company_name, bs.close_price, bs.stock_date, cs.close_price, cs.stock_date
+      ORDER BY 
+        m.movie_id ${sort}
+      OFFSET $3
+      LIMIT $4;
+    `;
 
-    const movies = await query;
+    const movies = await this.userRepository.query(query, [
+      userId,
+      year,
+      offset,
+      limit,
+    ]);
 
     return {
       movieList: movies.map((movie) => ({
@@ -284,39 +290,49 @@ export class UsersService {
     sort: 'DESC' | 'ASC',
     userId: number | null,
   ): Promise<UserPollMovieListResponseDto> {
-    const query = `
-      SELECT 
-        m.movie_id AS "movieId",
-        m.movie_title AS "movieTitle",
-        array_agg(m.movie_poster) AS "posterUrl",
-        (SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up",
-        (SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down",
-        COALESCE((
-          SELECT p.poll_flag
+    const query = this.movieRepository
+      .createQueryBuilder('m')
+      .select([
+        'm.movie_id AS "movieId"',
+        'm.movie_title AS "movieTitle"',
+        'array_agg(m.movie_poster) AS "posterUrl"',
+        `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up"`,
+        `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down"`,
+        `COALESCE((
+          SELECT CASE WHEN p.poll_flag = true THEN 'up' ELSE 'down' END
           FROM poll p
-          WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = $1
-        ), NULL) AS "pollResult"
-      FROM 
-        movie m
-      LEFT JOIN 
-        poll p ON p.fk_movie_id = m.movie_id
-      WHERE 
-        EXTRACT(YEAR FROM m.movie_open_date) = $2
-        AND m.movie_open_date < CURRENT_DATE
-      GROUP BY 
-        m.movie_id
-      ORDER BY 
-        m.movie_open_date ${sort}
-      OFFSET $3
-      LIMIT $4;
-    `;
+          WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = :userId
+        ), NULL) AS "pollResult"`,
+        'c.country AS "countryCode"',
+        'c.company_name AS "companyName"',
+        'bs.close_price AS "beforePrice"',
+        'bs.stock_date AS "beforePriceDate"',
+        'cs.close_price AS "afterPrice"',
+        'cs.stock_date AS "afterPriceDate"',
+      ])
+      .leftJoin('company', 'c', 'm.fk_company_id = c.company_cd')
+      .leftJoin(
+        'stock',
+        'bs',
+        'bs.ticker_name = c.ticker_name AND bs.stock_date = (SELECT MAX(stock_date) FROM stock WHERE ticker_name = c.ticker_name AND stock_date < CURRENT_DATE)',
+      )
+      .leftJoin(
+        'stock',
+        'cs',
+        'cs.ticker_name = c.ticker_name AND cs.stock_date = CURRENT_DATE',
+      )
+      .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
+      .andWhere('m.movie_open_date < CURRENT_DATE')
+      .groupBy(
+        'm.movie_id, c.country, c.company_name, bs.close_price, bs.stock_date, cs.close_price, cs.stock_date',
+      )
+      .orderBy('m.movie_id', sort)
+      .offset(offset)
+      .limit(limit)
+      .setParameter('userId', userId)
+      .getRawMany();
 
-    const movies = await this.movieRepository.query(query, [
-      userId,
-      year,
-      offset,
-      limit,
-    ]);
+    const movies = await query;
 
     return {
       movieList: movies.map((movie) => ({
@@ -325,12 +341,13 @@ export class UsersService {
         posterUrl: movie.posterUrl,
         up: Number(movie.up),
         down: Number(movie.down),
-        pollResult:
-          movie.pollResult === true
-            ? PollResult.UP
-            : movie.pollResult === false
-              ? PollResult.DOWN
-              : PollResult.NONE,
+        pollResult: movie.pollResult,
+        countryCode: movie.countryCode || undefined,
+        companyName: movie.companyName || undefined,
+        beforePrice: parseFloat(movie.beforePrice) || undefined,
+        beforePriceDate: movie.beforePriceDate || undefined,
+        afterPrice: parseFloat(movie.afterPrice) || undefined,
+        afterPriceDate: movie.afterPriceDate || undefined,
       })),
       movieListCount: movies.length,
       pagination: {
