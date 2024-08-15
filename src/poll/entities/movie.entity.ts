@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Poll } from './poll.entity';
 
 @Entity('movie')
 export class Movie {
@@ -25,4 +26,7 @@ export class Movie {
 
   @Column({ name: 'fk_company_id', type: 'character varying', length: 20 })
   companyId: string;
+
+  @OneToMany(() => Poll, (poll) => poll.movie)
+  polls: Poll[];
 }

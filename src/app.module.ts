@@ -15,6 +15,7 @@ import { UsersModule } from './users/users.module';
 import { PollModule } from './poll/poll.module';
 import { Poll } from './poll/entities/poll.entity';
 import { Movie } from './poll/entities/movie.entity';
+import { MovieListModule } from './movie-list/movie-list.module';
 import { MovieDetailModule } from './movie-detail/movie-detail.module';
 
 @Module({
@@ -49,6 +50,7 @@ import { MovieDetailModule } from './movie-detail/movie-detail.module';
     AuthModule,
     UsersModule,
     PollModule,
+    MovieListModule,
     MovieDetailModule,
   ],
   controllers: [AppController],
