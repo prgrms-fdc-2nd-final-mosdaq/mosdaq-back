@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Movie } from 'src/poll/entities/movie.entity';
 import { shiftDateByWeeks, getYesterdayDate } from 'src/util/date';
-import { Repository, Between } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { Stock } from './entities/stock.entity';
 import { StockDto } from './dto/stock.dto';
@@ -97,34 +97,23 @@ export class StocksService {
           const prices = await this.stockRepository.find({
             where: {
               tickerName: company.tickerName,
-              stockDate: Between(fromDate, toDate),
+              stockDate: In([fromDate, toDate]),
             },
           });
 
-          let minPrice = Infinity;
-          let maxPrice = -Infinity;
+          let fromPrice = +prices[0].closePrice;
+          let toPrice = +prices[1].closePrice;
 
-          prices.forEach((price) => {
-            if (+price.closePrice < minPrice) {
-              minPrice = +price.closePrice;
-            }
-            if (+price.closePrice > maxPrice) {
-              maxPrice = +price.closePrice;
-            }
-          });
-
-          return { minPrice, maxPrice };
+          return { fromPrice, toPrice };
         }),
       );
 
       // 주가 변동률을 계산하고 평균을 구합니다.
       let totalVariation = 0;
       priceBoundary.forEach((boundary) => {
-        const { minPrice, maxPrice } = boundary;
-        if (minPrice !== Infinity && maxPrice !== -Infinity) {
-          const variation = ((maxPrice - minPrice) / minPrice) * 100;
-          totalVariation += variation;
-        }
+        const { fromPrice, toPrice } = boundary;
+        const variation = ((toPrice - fromPrice) / fromPrice) * 100;
+        totalVariation += variation;
       });
 
       const averageVariation = totalVariation / priceBoundary.length;

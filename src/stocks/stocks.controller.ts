@@ -37,6 +37,7 @@ export class StocksController {
       afterPriceDate: fourWeeksAfterStock.stockDate,
       afterPrice: parseFloat(fourWeeksAfterStock.closePrice),
       stockIndustryAverageVariation: parseFloat(averageStockVariation),
+      companyName: company.companyName,
     };
   }
 }
