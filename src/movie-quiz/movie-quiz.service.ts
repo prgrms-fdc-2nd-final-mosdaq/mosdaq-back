@@ -32,6 +32,7 @@ export class MovieQuizService {
           'movie_stock.four_weeks_before_price',
           'movie_stock.four_weeks_after_price',
           'company.country',
+          'company.company_name',
         ])
         .where("movie.movie_open_date <= CURRENT_DATE - INTERVAL '30 days'")
         .orderBy('RANDOM()')
@@ -43,7 +44,8 @@ export class MovieQuizService {
         moviePoster: quiz.movie_poster.split('|'),
         fourWeeksBeforePrice: +quiz.four_weeks_before_price,
         fourWeeksAfterPrice: +quiz.four_weeks_after_price,
-        currency: quiz.country,
+        companyCountry: quiz.company_country,
+        companyName: quiz.company_name,
       }));
     } catch (err) {
       console.error('Error fetching main movies:', err);
