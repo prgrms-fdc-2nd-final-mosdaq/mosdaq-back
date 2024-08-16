@@ -36,38 +36,6 @@ export class StocksController {
   async getStockPriceByMovieId(
     @Param('movieId') movieId: string,
   ): Promise<StockInfoResponseByMovieId | null> {
-    const movie: Movie = await this.stocksService.findMovieByMovieId(+movieId);
-    const company: Company = await this.stocksService.findCompanyByCompanyCd(
-      movie.companyId,
-    );
-
-    const fourWeeksBeforeStock: Stock = await this.stocksService.getStockInfo(
-      movie.movieOpenDate,
-      company.tickerName,
-      true,
-    );
-
-    const fourWeeksAfterStock: Stock = await this.stocksService.getStockInfo(
-      movie.movieOpenDate,
-      company.tickerName,
-      false,
-    );
-
-    const averageStockVariation =
-      await this.stocksService.getAverageStockVariation(
-        fourWeeksBeforeStock.stockDate,
-        fourWeeksAfterStock.stockDate,
-        company.country,
-      );
-
-    return {
-      beforePriceDate: fourWeeksBeforeStock.stockDate,
-      beforePrice: parseFloat(fourWeeksBeforeStock.closePrice),
-      afterPriceDate: fourWeeksAfterStock.stockDate,
-      afterPrice: parseFloat(fourWeeksAfterStock.closePrice),
-      stockIndustryAverageVariation: parseFloat(averageStockVariation),
-      companyName: company.companyName,
-      countryCode: company.country,
-    };
+    return this.stocksService.getStockInfoByMovieId(+movieId);
   }
 }
