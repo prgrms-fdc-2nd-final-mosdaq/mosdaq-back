@@ -10,7 +10,6 @@ import { Repository, In } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { Stock } from './entities/stock.entity';
 import { StockDto } from './dto/stock.dto';
-import { CompanyDto } from './dto/company.dto';
 import { StockInfoResponseByMovieId } from './dto/stockInfoByMovieId.dto';
 
 @Injectable()

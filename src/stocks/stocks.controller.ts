@@ -6,10 +6,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Movie } from 'src/poll/entities/movie.entity';
 import { StockInfoResponseByMovieId } from './dto/stockInfoByMovieId.dto';
-import { Company } from './entities/company.entity';
-import { Stock } from './entities/stock.entity';
 import { StocksService } from './stocks.service';
 
 @ApiTags('영화 관련 회사 주가 정보 조회 api')
