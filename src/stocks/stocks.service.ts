@@ -91,7 +91,7 @@ export class StocksService {
         where: { country: countryCode },
       });
 
-      // 각 회사에 대해 주어진 기간에 대해 최대 주가, 최소 주가를 찾습니다.
+      // 모든 회사에 대해 주어진 날짜의 주가를 얻음
       let priceBoundary = await Promise.all(
         companies.map(async (company) => {
           const prices = await this.stockRepository.find({
