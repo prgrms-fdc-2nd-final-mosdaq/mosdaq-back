@@ -6,7 +6,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { Movie } from 'src/poll/entities/movie.entity';
 import { StockInfoResponseByMovieId } from './dto/stockInfoByMovieId.dto';
+import { Company } from './entities/company.entity';
+import { Stock } from './entities/stock.entity';
 import { StocksService } from './stocks.service';
 
 @ApiTags('영화 관련 회사 주가 정보 조회 api')
@@ -33,18 +36,18 @@ export class StocksController {
   async getStockPriceByMovieId(
     @Param('movieId') movieId: string,
   ): Promise<StockInfoResponseByMovieId | null> {
-    const movie = await this.stocksService.findMovieByMovieId(+movieId);
-    const company = await this.stocksService.findCompanyByCompanyCd(
+    const movie: Movie = await this.stocksService.findMovieByMovieId(+movieId);
+    const company: Company = await this.stocksService.findCompanyByCompanyCd(
       movie.companyId,
     );
 
-    const fourWeeksBeforeStock = await this.stocksService.getStockInfo(
+    const fourWeeksBeforeStock: Stock = await this.stocksService.getStockInfo(
       movie.movieOpenDate,
       company.tickerName,
       true,
     );
 
-    const fourWeeksAfterStock = await this.stocksService.getStockInfo(
+    const fourWeeksAfterStock: Stock = await this.stocksService.getStockInfo(
       movie.movieOpenDate,
       company.tickerName,
       false,
@@ -64,6 +67,7 @@ export class StocksController {
       afterPrice: parseFloat(fourWeeksAfterStock.closePrice),
       stockIndustryAverageVariation: parseFloat(averageStockVariation),
       companyName: company.companyName,
+      countryCode: company.country,
     };
   }
 }
