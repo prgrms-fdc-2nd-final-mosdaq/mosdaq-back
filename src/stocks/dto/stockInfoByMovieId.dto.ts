@@ -36,4 +36,10 @@ export class StockInfoResponseByMovieId {
     type: String,
   })
   companyName: string;
+
+  @ApiProperty({
+    description: '회사 상장 국가 코드',
+    type: String,
+  })
+  countryCode: string;
 }

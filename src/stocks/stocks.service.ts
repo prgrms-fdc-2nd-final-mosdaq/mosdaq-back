@@ -10,7 +10,7 @@ import { Repository, In } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { Stock } from './entities/stock.entity';
 import { StockDto } from './dto/stock.dto';
-import { CompanyDto } from './dto/company.dto';
+import { StockInfoResponseByMovieId } from './dto/stockInfoByMovieId.dto';
 
 @Injectable()
 export class StocksService {
@@ -25,29 +25,52 @@ export class StocksService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async findMovieByMovieId(movieId: number): Promise<Movie | null> {
+  async getStockInfoByMovieId(
+    movieId: number,
+  ): Promise<StockInfoResponseByMovieId | null> {
     try {
-      const movie = await this.movieRepository.findOne({
+      const movie: Movie = await this.movieRepository.findOne({
         where: { movieId: movieId },
       });
       if (!movie) throw new NotFoundException('존재하지 않는 영화 id입니다.');
-      return movie;
-    } catch (error) {
-      console.log('Error while search movie by movieId');
-      throw new BadRequestException();
-    }
-  }
 
-  async findCompanyByCompanyCd(companyCd: string): Promise<CompanyDto | null> {
-    try {
-      const company = await this.companyRepository.findOne({
-        where: { companyCd: companyCd },
+      const company: Company = await this.companyRepository.findOne({
+        where: { companyCd: movie.companyId },
       });
 
-      return company;
+      const fourWeeksBeforeStock: Stock = await this.getStockInfo(
+        movie.movieOpenDate,
+        company.tickerName,
+        true,
+      );
+
+      const fourWeeksAfterStock: Stock = await this.getStockInfo(
+        movie.movieOpenDate,
+        company.tickerName,
+        false,
+      );
+
+      const averageStockVariation = await this.getAverageStockVariation(
+        fourWeeksBeforeStock.stockDate,
+        fourWeeksAfterStock.stockDate,
+        company.country,
+      );
+
+      return {
+        beforePriceDate: fourWeeksBeforeStock.stockDate,
+        beforePrice: parseFloat(fourWeeksBeforeStock.closePrice),
+        afterPriceDate: fourWeeksAfterStock.stockDate,
+        afterPrice: parseFloat(fourWeeksAfterStock.closePrice),
+        stockIndustryAverageVariation: parseFloat(averageStockVariation),
+        companyName: company.companyName,
+        countryCode: company.country,
+      };
     } catch (error) {
-      console.log('Error while search movie by movieId');
-      throw new BadRequestException();
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.log('error in getStockInfoByMovieId', error);
+      throw new BadRequestException('알 수 없는 이유로 요청에 실패하였습니다.');
     }
   }
 
@@ -76,7 +99,7 @@ export class StocksService {
       return stock;
     } catch (error) {
       console.log('Error in getStockInfoByMovieId', error);
-      throw new BadRequestException();
+      throw new BadRequestException('알 수 없는 이유로 요청에 실패하였습니다.');
     }
   }
 
@@ -121,7 +144,7 @@ export class StocksService {
       return averageVariation.toFixed(2);
     } catch (error) {
       console.log('Error in getAverageStockVariation', error);
-      throw new BadRequestException();
+      throw new BadRequestException('알 수 없는 이유로 요청에 실패하였습니다.');
     }
   }
 }
