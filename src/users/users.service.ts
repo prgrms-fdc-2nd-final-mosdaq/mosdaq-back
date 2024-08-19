@@ -155,35 +155,37 @@ export class UsersService {
     // poll 값에 따라 부등호 설정
     const dateComparison = poll ? '>' : '<';
 
+    // 사용자 투표가 있는 영화들만 선택
     const query: SelectQueryBuilder<Movie> = this.movieRepository
       .createQueryBuilder('m')
-      .leftJoinAndSelect('m.company', 'c')
-      .leftJoinAndSelect('m.polls', 'p')
+      .leftJoinAndSelect('m.polls', 'p', 'p.fk_user_id = :userId', { userId })
       .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
       .andWhere(`m.movie_open_date ${dateComparison} CURRENT_DATE`)
+      .andWhere(`p.fk_user_id = :userId`)
       .select([
         'm.movie_id AS "movieId"',
         'm.movie_title AS "movieTitle"',
         'm.movie_poster AS "posterUrl"',
         `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up"`,
         `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down"`,
-        `COALESCE((
+        `(
           SELECT CASE WHEN p.poll_flag = true THEN 'up' ELSE 'down' END
           FROM poll p
           WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = :userId
-        ), NULL) AS "pollResult"`,
+        ) AS "pollResult"`,
       ])
       .groupBy('m.movie_id')
       .orderBy('m.movie_id', sort)
       .offset(offset)
       .limit(limit);
 
-    // userId 변수 바인딩
-    const movies = await query.setParameter('userId', userId).getRawMany();
+    // 쿼리 실행
+    const movies = await query.getRawMany();
 
     // 페이지네이션 계산
     const totalMoviesCount = await this.movieRepository
       .createQueryBuilder('m')
+      .leftJoin('m.polls', 'p', 'p.fk_user_id = :userId', { userId })
       .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
       .andWhere(`m.movie_open_date ${dateComparison} CURRENT_DATE`)
       .getCount();

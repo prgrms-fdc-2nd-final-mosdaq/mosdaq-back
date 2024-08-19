@@ -93,7 +93,6 @@ export class MovieListController {
   ): Promise<PollMovieListResponseDto> {
     try {
       // TODO: request header에서 token 뽑아내기
-      // const userId: number | null = null;
       const userId: number | null = null;
 
       // TODO: this.movieListService.getPollMovies(poll, ...) 하나로 통일, 별도 branch에서 처리

@@ -130,6 +130,7 @@ export class UsersController {
     try {
       // TODO: request header에서 token 뽑아내기
       const userId: number | null = null;
+      // const userId: number | null = 2;
 
       // TODO: service로 호출할 때 파라미터에 대해 DTO룰 넣을지 고려
       return this.userService.getUserPollMovies(
