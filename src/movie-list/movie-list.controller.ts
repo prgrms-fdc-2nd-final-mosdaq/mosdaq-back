@@ -96,6 +96,7 @@ export class MovieListController {
       // const userId: number | null = null;
       const userId: number | null = null;
 
+      // TODO: this.movieListService.getPollMovies(poll, ...) 하나로 통일, 별도 branch에서 처리
       if (poll === true) {
         return this.movieListService.getPollMovies(
           true,

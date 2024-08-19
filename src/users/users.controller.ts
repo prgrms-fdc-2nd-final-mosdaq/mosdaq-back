@@ -131,28 +131,15 @@ export class UsersController {
       // TODO: request header에서 token 뽑아내기
       const userId: number | null = null;
 
-      if (poll === true) {
-        return this.userService.getUserPollingMovies(
-          true,
-          year,
-          offset,
-          limit,
-          sort,
-          userId,
-        );
-      } else if (poll === false) {
-        return this.userService.getUserPolledMovies(
-          false,
-          year,
-          offset,
-          limit,
-          sort,
-          userId,
-        );
-      } else {
-        // TODO: 에러 헨들링
-        throw new Error('Invalid poll query parameter');
-      }
+      // TODO: service로 호출할 때 파라미터에 대해 DTO룰 넣을지 고려
+      return this.userService.getUserPollMovies(
+        poll,
+        year,
+        offset,
+        limit,
+        sort,
+        userId,
+      );
     } catch (err) {
       // TODO: 에러 헨들링
       console.error('Error in /api/v1/movie/list?poll=true  : ', poll);
