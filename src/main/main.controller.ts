@@ -8,6 +8,7 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { SWAGGER_INTERNAL_SERVER_ERROR_CONTENT } from 'src/constants';
+import { MainMovieResponseDto } from './dto/main-movie-response.dto';
 
 @Controller('api/v1/main-movie')
 @ApiTags('대표 영화 api')
@@ -23,35 +24,14 @@ export class MainController {
   @ApiOkResponse({
     description:
       '서비스 운영자가 선정한 영화 5개의 영화 데이터 및 개봉 4주 전, 4주 후 주가 데이터와 함께 반환합니다.',
-    schema: {
-      type: 'object',
-      properties: {
-        movieList: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              movieId: { type: 'number' },
-              movieTitle: { type: 'string' },
-              posterUrl: { type: 'string' },
-              countryCode: { type: 'string' },
-              beforePrice: { type: 'number' },
-              afterPrice: { type: 'number' },
-              beforePriceDate: { type: 'string', format: 'date-time' },
-              afterPriceDate: { type: 'string', format: 'date-time' },
-            },
-          },
-        },
-        movieListCount: { type: 'number' },
-      },
-    },
+    type: MainMovieResponseDto,
   })
   @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
-  async mainMovie() {
-    // TOOD: 에러 핸들링
+  async mainMovie(): Promise<MainMovieResponseDto> {
+    // TOOD: 에러 핸들링, service에서 해놓았으니 controller에서 예외처리를 하지 않아도 괜찮은가?
     return await this.mainService.getMainMovies();
   }
 
