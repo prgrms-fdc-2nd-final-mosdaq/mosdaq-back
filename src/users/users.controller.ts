@@ -9,7 +9,7 @@ import {
   ParseBoolPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { AccessTokenGuard } from 'src/auth/accessToken.guard';
+import { AccessTokenGuard } from 'src/auth/Jwt/accessToken.guard';
 import {
   ApiBadRequestResponse,
   ApiHeader,

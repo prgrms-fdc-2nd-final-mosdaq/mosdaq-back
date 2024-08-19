@@ -11,13 +11,16 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AccessTokenGuard } from 'src/auth/accessToken.guard';
+import { AccessTokenGuard } from 'src/auth/Jwt/accessToken.guard';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
 import { OptionalAccessTokenGuard } from 'src/auth/optionalAccessToken.guard';
+import { UsersModel } from 'src/users/entities/users.entity';
+import { User } from 'src/users/users.decorator';
+import { JwtStrategy } from 'src/auth/Jwt/Jwt.strategy';
+import { JwtAuthGuard } from 'src/auth/Jwt/JwtAuth.guard';
 // import { Repository } from 'typeorm';
 // import { Poll } from './entities/poll.entity';
-
 
 @ApiTags('투표 관련')
 @Controller('api/v1/poll')
@@ -92,17 +95,11 @@ export class PollController {
   @ApiNotFoundResponse({
     description: '요청하신 정보를 찾을 수 없습니다.',
   })
-  @UseGuards(OptionalAccessTokenGuard)
+  @UseGuards(JwtAuthGuard)
   async getPollBox(
-    @Param('movieId') id: number,
-    @Request() req,
+    @Param('movieId') movieId: number,
+    @User() user: UsersModel,
   ): Promise<PollBoxResponseDto> {
-    const userId: number = req.user ? req.user.sub : null;
-    const pollBoxDto: PollBoxDto = { id, userId };
-
-    pollBoxDto.id = id;
-    pollBoxDto.userId = userId;
-
-    return this.pollService.getPollBoxByMovieId(pollBoxDto);
+    return this.pollService.getPollBoxByMovieId(movieId);
   }
 }

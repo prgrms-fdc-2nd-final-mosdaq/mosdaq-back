@@ -6,13 +6,14 @@ import {
   Post,
   UsePipes,
   ValidationPipe,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UseGuards } from '@nestjs/common';
 import { RefreshAuthTokenDto } from './dto/refreshAuthToken.dto';
-import { AccessTokenGuard } from './accessToken.guard';
+import { AccessTokenGuard } from './Jwt/accessToken.guard';
 import { GoogleOAuthDto } from './dto/googleOAuth.dto';
-import { GoogleAuthGuard } from './auth.guard';
+import { GoogleAuthGuard } from './google.auth.guard';
 import { Request, Response } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -26,6 +27,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TokenResponse } from './dto/tokenResponse.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth 관련')
 @Controller('api/v1/auth')
@@ -70,6 +72,7 @@ export class AuthController {
   })
   @UsePipes(new ValidationPipe())
   async googleAuthRedirect(
+    @Req() req,
     @Body() googleOAuthDto: GoogleOAuthDto,
   ): Promise<TokenResponse> {
     const payload =

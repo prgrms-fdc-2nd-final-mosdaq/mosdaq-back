@@ -6,7 +6,8 @@ import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AccessTokenGuard } from './accessToken.guard';
+import { AccessTokenGuard } from './Jwt/accessToken.guard';
+import { JwtStrategy } from './Jwt/Jwt.strategy';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { AccessTokenGuard } from './accessToken.guard';
   ],
   exports: [AccessTokenGuard, JwtModule],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, AccessTokenGuard],
+  providers: [AuthService, GoogleStrategy, AccessTokenGuard, JwtStrategy],
 })
 export class AuthModule {}
