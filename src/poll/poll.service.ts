@@ -4,13 +4,14 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager, MoreThan } from 'typeorm';
+import { Repository, EntityManager, MoreThan, IsNull } from 'typeorm';
 import { Poll } from './entities/poll.entity';
 import { UsersModel } from '../users/entities/users.entity';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { POLL_PARTICIPATION_POINTS } from 'src/constants';
 import { Movie } from './entities/movie.entity';
 import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
+import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
 
 // TODO: logger로 전환
 @Injectable()
@@ -119,14 +120,16 @@ export class PollService {
   }
 
   async getPollBoxByMovieId(
-    pollBoxDto: PollBoxDto,
+    movieId: number,
+    user?: JwtUserDto | null,
   ): Promise<PollBoxResponseDto> {
     const movie = await this.movieRepository.findOne({
-      where: { movieId: pollBoxDto.id },
+      where: { movieId: movieId },
     });
+
     if (!movie) {
       console.warn(
-        `유효하지 않은 영화 ID ${pollBoxDto.id}: 영화가 존재하지 않습니다.`,
+        `유효하지 않은 영화 ID ${movieId}: 영화가 존재하지 않습니다.`,
       );
       throw new BadRequestException(
         '유효하지 않은 영화 ID: 영화가 존재하지 않습니다.',
@@ -134,38 +137,35 @@ export class PollService {
     }
 
     try {
-      const { id, userId } = pollBoxDto;
-
       const totalUpCount = await this.pollRepository.count({
         where: {
-          movieId: id,
+          movieId: movieId,
           pollFlag: true,
         },
       });
 
       const totalDownCount = await this.pollRepository.count({
         where: {
-          movieId: id,
+          movieId: movieId,
           pollFlag: false,
         },
       });
 
       let pollResult: 'up' | 'down' | null = null;
 
-      if (userId) {
-        const isUserVoted = await this.pollRepository.findOne({
-          where: { userId, movieId: id },
-        });
-        if (isUserVoted) {
-          pollResult = isUserVoted.pollFlag ? 'up' : 'down';
-        }
+      const isUserVoted = await this.pollRepository.findOne({
+        where: { userId: user?.sub ? user.sub : IsNull(), movieId: movieId },
+      });
+
+      if (isUserVoted) {
+        pollResult = isUserVoted.pollFlag ? 'up' : 'down';
       }
 
       const response: PollBoxResponseDto = {
         total: totalUpCount + totalDownCount,
         up: totalUpCount,
         down: totalDownCount,
-        ...(userId && { pollResult }), // userId가 있는 경우에만 pollResult 포함
+        pollResult,
       };
 
       return response;
