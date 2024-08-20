@@ -17,8 +17,9 @@ import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
 import { OptionalAccessTokenGuard } from 'src/auth/optionalAccessToken.guard';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { User } from 'src/users/users.decorator';
-import { JwtStrategy } from 'src/auth/Jwt/Jwt.strategy';
+// import { JwtStrategy } from 'src/auth/Jwt/Jwt.strategy';
 import { JwtAuthGuard } from 'src/auth/Jwt/JwtAuth.guard';
+import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
 // import { Repository } from 'typeorm';
 // import { Poll } from './entities/poll.entity';
 
@@ -98,8 +99,10 @@ export class PollController {
   @UseGuards(JwtAuthGuard)
   async getPollBox(
     @Param('movieId') movieId: number,
-    @User() user: UsersModel,
+    @User() user: JwtUserDto | null,
   ): Promise<PollBoxResponseDto> {
-    return this.pollService.getPollBoxByMovieId(movieId);
+    console.log('user : ', user);
+
+    return this.pollService.getPollBoxByMovieId(movieId, user);
   }
 }

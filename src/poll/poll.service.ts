@@ -11,6 +11,7 @@ import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { POLL_PARTICIPATION_POINTS } from 'src/constants';
 import { Movie } from './entities/movie.entity';
 import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
+import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
 
 // TODO: logger로 전환
 @Injectable()
@@ -120,7 +121,7 @@ export class PollService {
 
   async getPollBoxByMovieId(
     movieId: number,
-    user?: UsersModel,
+    user?: JwtUserDto | null,
   ): Promise<PollBoxResponseDto> {
     const movie = await this.movieRepository.findOne({
       where: { movieId: movieId },
@@ -153,13 +154,13 @@ export class PollService {
       let pollResult: 'up' | 'down' | null = null;
 
       const isUserVoted = await this.pollRepository.findOne({
-        where: { userId: user?.id, movieId: movieId },
+        where: { userId: user?.sub, movieId: movieId },
       });
 
       if (isUserVoted) {
         pollResult = isUserVoted.pollFlag ? 'up' : 'down';
       }
-
+      console.log(isUserVoted);
       const response: PollBoxResponseDto = {
         total: totalUpCount + totalDownCount,
         up: totalUpCount,

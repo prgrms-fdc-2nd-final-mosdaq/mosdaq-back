@@ -32,6 +32,9 @@ import {
   MOVIE_LIST_DEFAULT_OFFSET,
   MOVIE_LIST_DEFAULT_SORT,
 } from 'src/constants/app.constants';
+import { JwtAuthGuard } from 'src/auth/Jwt/JwtAuth.guard';
+import { User } from './users.decorator';
+import { JwtUserDto } from './dto/JwtUser.dto';
 
 @ApiTags('user 관련')
 @Controller('api/v1/users')
@@ -61,8 +64,9 @@ export class UsersController {
     description: '요청하신 정보를 찾을 수 없습니다.',
   })
   @UseGuards(AccessTokenGuard)
-  async getUserInfo(@Request() req): Promise<UserInfo> {
-    const userInfo = await this.userService.getUserInfo(req.user.sub);
+  @UseGuards(JwtAuthGuard)
+  async getUserInfo(@User() user: JwtUserDto): Promise<UserInfo> {
+    const userInfo = await this.userService.getUserInfo(user.sub);
     return {
       name: userInfo.name,
       email: userInfo.email,
