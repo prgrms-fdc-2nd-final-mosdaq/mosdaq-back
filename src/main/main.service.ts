@@ -6,6 +6,12 @@ import { PopularMoviePollingView } from './entities/popular-movie-polling-view.e
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
 import { format } from 'date-fns';
+import {
+  POPULAR_MOVIE_POLLED_COUNT,
+  POPULAR_MOVIE_POLLING_COUNT,
+} from 'src/constants/app.constants';
+import { getYYYYMMDDDate } from 'src/util/date';
+import { MainMovieResponseDto } from './dto/main-movie-response.dto';
 
 @Injectable()
 export class MainService {
@@ -20,7 +26,7 @@ export class MainService {
     private readonly popularMoviePolledRepository: Repository<PopularMoviePolledView>,
   ) {}
 
-  async getMainMovies(): Promise<any> {
+  async getMainMovies(): Promise<MainMovieResponseDto> {
     try {
       const movieList = await this.mainMovieRepository.find();
       return {
@@ -29,10 +35,33 @@ export class MainService {
           movieTitle: movie.movieTitle,
           posterUrl: movie.moviePoster.split('|'),
           countryCode: movie.country.trim(),
-          beforePrice: movie.beforePrice,
-          afterPrice: movie.afterPrice,
-          beforePriceDate: movie.beforeDate,
-          afterPriceDate: movie.afterDate,
+          companyName: movie.companyName,
+          beforePrice: Number(movie.fourWeeksBeforePrice),
+          afterPrice: Number(movie.fourWeeksAfterPrice),
+          beforeDate: getYYYYMMDDDate(movie.fourWeeksBeforeDate),
+          afterDate: getYYYYMMDDDate(movie.fourWeeksAfterDate),
+          stockPriceList: [
+            {
+              price: Number(movie.eightWeeksBeforePrice),
+              date: getYYYYMMDDDate(movie.eightWeeksBeforeDate),
+            },
+            {
+              price: Number(movie.fourWeeksBeforePrice),
+              date: getYYYYMMDDDate(movie.fourWeeksBeforeDate),
+            },
+            {
+              price: Number(movie.movieOpenDateStockPrice),
+              date: getYYYYMMDDDate(movie.movieOpenDateStockDate),
+            },
+            {
+              price: Number(movie.fourWeeksAfterPrice),
+              date: getYYYYMMDDDate(movie.fourWeeksAfterDate),
+            },
+            {
+              price: Number(movie.eightWeeksAfterPrice),
+              date: getYYYYMMDDDate(movie.eightWeeksAfterDate),
+            },
+          ],
         })),
         movieListCount: movieList.length,
       };
@@ -67,7 +96,7 @@ export class MainService {
         ])
         .orderBy('pmv.poll_count', 'DESC')
         .addOrderBy('pmv.movie_open_date', 'ASC')
-        .limit(5);
+        .limit(POPULAR_MOVIE_POLLING_COUNT);
 
       // TODO: queryBuilder.getRawMany() 이후 movietitle 처럼 camelCase로 안나오는 이슈 해결
       const movieList = await queryBuilder.getRawMany();
@@ -77,12 +106,8 @@ export class MainService {
           movieId: parseInt(movie.movieid, 10),
           movieTitle: movie.movietitle,
           posterUrl: movie.posterurl.split('|'),
-          up: parseInt(movie.pollcount, 10)
-            ? (parseInt(movie.up, 10) / parseInt(movie.pollcount, 10)) * 100
-            : 0,
-          down: parseInt(movie.pollcount, 10)
-            ? (parseInt(movie.down, 10) / parseInt(movie.pollcount, 10)) * 100
-            : 0,
+          up: parseInt(movie.up, 10),
+          down: parseInt(movie.down, 10),
           pollCount: parseInt(movie.pollcount, 10) || 0,
           myPollResult: userId ? movie.mypollresult : null,
         })),
@@ -92,7 +117,7 @@ export class MainService {
       // TODO: 에러 핸들링 통일
       console.error('Error fetching popular polling movies:', err);
       throw new HttpException(
-        '투표 중인 가장 투표가 많은 영화 5개를 가져오는데 실패 하였습니다.',
+        `투표 중인 영화 목록을 가져오는데 실패 하였습니다.`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -101,8 +126,6 @@ export class MainService {
   // TODO: 투표 수가 0일때 '0'으로 가져와지고 그로인하여 결과가 null로 나오는 이슈 해결 필요
   async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
     try {
-      const POPULAR_MOVIE_POLLED_COUNT = 5;
-
       const queryBuilder: SelectQueryBuilder<PopularMoviePolledView> =
         this.popularMoviePolledRepository
           .createQueryBuilder('p')
@@ -124,8 +147,10 @@ export class MainService {
             ? Math.round(Number((movie.downPolls / movie.pollCount) * 100))
             : 0,
         countryCode: String(movie.country),
+        // TODO: companyName 포함
         beforePrice: Number(movie.beforePrice),
         afterPrice: Number(movie.afterPrice),
+        // TODO: util, getYYYYMMDDDate() 메서드로 대체
         beforePriceDate: format(new Date(movie.beforeDate), 'yyyy-MM-dd'),
         afterPriceDate: format(new Date(movie.afterDate), 'yyyy-MM-dd'),
       }));
@@ -134,7 +159,7 @@ export class MainService {
     } catch (err) {
       console.error('Error fetching popular polled movies:', err);
       throw new HttpException(
-        '투표 중인 영화 목록을 가져오는데 실패 하였습니다.',
+        '투표 마감된 영화 목록을 가져오는데 실패 하였습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
