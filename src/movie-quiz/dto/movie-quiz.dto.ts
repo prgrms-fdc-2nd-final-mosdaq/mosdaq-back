@@ -18,7 +18,11 @@ export class MovieQuizDto {
   @IsNumber()
   fourWeeksAfterPrice: number;
 
-  @ApiProperty({ description: '통화' })
+  @ApiProperty({ description: '회사 국적' })
   @IsString()
-  currency: string;
+  companyCountry: string;
+
+  @ApiProperty({ description: '회사명' })
+  @IsString()
+  companyName: string;
 }
