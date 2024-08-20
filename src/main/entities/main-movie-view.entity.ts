@@ -1,8 +1,6 @@
 import { ViewEntity, ViewColumn } from 'typeorm';
 
-// TODO: mosdaq-data 에서 main_movie_view 변경 이후 적용
-@ViewEntity({ name: 'main_movie_view_to_be' })
-// @ViewEntity({ name: 'main_movie_view' })
+@ViewEntity({ name: 'main_movie_view' })
 export class MainMovieView {
   @ViewColumn({ name: 'movie_id' })
   movieId: number;
