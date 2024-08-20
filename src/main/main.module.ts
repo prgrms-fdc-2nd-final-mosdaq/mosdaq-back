@@ -5,6 +5,8 @@ import { PopularMoviePollingView } from './entities/popular-movie-polling-view.e
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 import { MainService } from './main.service';
 import { MainController } from './main.controller';
+import { AuthModule } from 'src/auth/auth.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { MainController } from './main.controller';
       PopularMoviePollingView,
       PopularMoviePolledView,
     ]),
+    AuthModule,
+    UsersModule,
   ],
   providers: [MainService],
   controllers: [MainController],

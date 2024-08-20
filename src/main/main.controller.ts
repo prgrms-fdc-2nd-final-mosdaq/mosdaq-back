@@ -1,5 +1,8 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { MainService } from './main.service';
+import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
+import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
+import { User } from 'src/users/users.decorator';
 import {
   ApiTags,
   ApiOperation,
@@ -75,10 +78,13 @@ export class MainController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
-  // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생
-  async popularPollingMovies(@Query('poll') poll: string, @Req() req: any) {
+  @UseGuards(JwtAuthGuard)
+  async popularPollingMovies(
+    @Query('poll') poll: string,
+    @User() user: JwtUserDto | null,
+  ) {
     try {
-      const userId = req.user ? req.user.id : null;
+      const userId = user?.sub ? user.sub : null;
       if (poll === 'true') {
         return await this.mainService.getPopularMoviesPolling(userId);
       } else if (poll === 'false') {
