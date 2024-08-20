@@ -1,11 +1,25 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, Inject, Query, Req } from '@nestjs/common';
 import { MainService } from './main.service';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { WINSTON_MODULE_PROVIDER, WinstonLogger } from 'nest-winston';
 
 @Controller('api/v1/main-movie')
 @ApiTags('대표 영화 api')
 export class MainController {
-  constructor(private readonly mainService: MainService) {}
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: WinstonLogger,
+    private readonly mainService: MainService,
+  ) {}
+
+  private printWinstonLog(dto) {
+    this.logger.error('error: ', dto);
+    this.logger.warn('warn: ', dto);
+    // this.logger.info('info: ', dto);
+    // this.logger.http('http: ', dto);
+    this.logger.verbose('verbose: ', dto);
+    this.logger.debug('debug: ', dto);
+    // this.logger.silly('silly: ', dto);
+  }
 
   @Get('/')
   @ApiOperation({
@@ -46,6 +60,8 @@ export class MainController {
   })
   async mainMovie() {
     // TOOD: 에러 핸들링
+    // this.printWinstonLog();
+    this.logger.log('main-movie');
     return await this.mainService.getMainMovies();
   }
 
