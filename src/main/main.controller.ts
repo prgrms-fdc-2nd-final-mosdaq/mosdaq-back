@@ -94,7 +94,6 @@ export class MainController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
   })
   @UseGuards(JwtAuthGuard)
-  // TODO: @Req() req: any => @Req() req: Request  req.user 데이터 타입을 모르는 이슈 발생
   async popularPollingMovies(
     @Query('poll') poll: string,
     @User() user: JwtUserDto | null,
