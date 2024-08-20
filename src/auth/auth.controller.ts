@@ -11,7 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { UseGuards } from '@nestjs/common';
 import { RefreshAuthTokenDto } from './dto/refreshAuthToken.dto';
-import { AccessTokenGuard } from './Jwt/accessToken.guard';
+import { AccessTokenGuard } from './jwt/accessToken.guard';
 import { GoogleOAuthDto } from './dto/googleOAuth.dto';
 import { GoogleAuthGuard } from './google.auth.guard';
 import { Request, Response } from '@nestjs/common';

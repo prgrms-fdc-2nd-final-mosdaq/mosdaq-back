@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager, MoreThan } from 'typeorm';
+import { Repository, EntityManager, MoreThan, IsNull } from 'typeorm';
 import { Poll } from './entities/poll.entity';
 import { UsersModel } from '../users/entities/users.entity';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
@@ -154,13 +154,13 @@ export class PollService {
       let pollResult: 'up' | 'down' | null = null;
 
       const isUserVoted = await this.pollRepository.findOne({
-        where: { userId: user?.sub, movieId: movieId },
+        where: { userId: user?.sub ? user.sub : IsNull(), movieId: movieId },
       });
 
       if (isUserVoted) {
         pollResult = isUserVoted.pollFlag ? 'up' : 'down';
       }
-      console.log(isUserVoted);
+
       const response: PollBoxResponseDto = {
         total: totalUpCount + totalDownCount,
         up: totalUpCount,

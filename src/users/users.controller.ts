@@ -9,7 +9,7 @@ import {
   ParseBoolPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { AccessTokenGuard } from 'src/auth/Jwt/accessToken.guard';
+import { AccessTokenGuard } from 'src/auth/jwt/accessToken.guard';
 import {
   ApiBadRequestResponse,
   ApiHeader,
@@ -32,7 +32,7 @@ import {
   MOVIE_LIST_DEFAULT_OFFSET,
   MOVIE_LIST_DEFAULT_SORT,
 } from 'src/constants/app.constants';
-import { JwtAuthGuard } from 'src/auth/Jwt/JwtAuth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
 import { User } from './users.decorator';
 import { JwtUserDto } from './dto/JwtUser.dto';
 
