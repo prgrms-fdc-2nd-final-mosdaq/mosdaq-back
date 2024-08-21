@@ -1,6 +1,7 @@
 import { ViewEntity, ViewColumn } from 'typeorm';
 
-@ViewEntity({ name: 'main_movie_view' })
+// TODO: main_movie_view로 변경
+@ViewEntity({ name: 'main_movie_view_to_be' })
 export class MainMovieView {
   @ViewColumn({ name: 'movie_id' })
   movieId: number;
@@ -8,42 +9,15 @@ export class MainMovieView {
   @ViewColumn({ name: 'movie_title' })
   movieTitle: string;
 
-  @ViewColumn({ name: 'eight_weeks_before_price' })
-  eightWeeksBeforePrice: number;
+  @ViewColumn({ name: 'movie_open_date' })
+  movieOpenDate: string;
 
-  @ViewColumn({ name: 'eight_weeks_after_price' })
-  eightWeeksAfterPrice: number;
-
-  @ViewColumn({ name: 'four_weeks_before_price' })
-  fourWeeksBeforePrice: number;
-
-  @ViewColumn({ name: 'four_weeks_after_price' })
-  fourWeeksAfterPrice: number;
-
-  @ViewColumn({ name: 'movie_open_date_stock_price' })
-  movieOpenDateStockPrice: number;
-
-  @ViewColumn({ name: 'movie_open_date_stock_date' })
-  movieOpenDateStockDate: Date;
-
-  @ViewColumn({ name: 'four_weeks_before_date' })
-  fourWeeksBeforeDate: Date;
-
-  @ViewColumn({ name: 'four_weeks_after_date' })
-  fourWeeksAfterDate: Date;
-
-  @ViewColumn({ name: 'eight_weeks_before_date' })
-  eightWeeksBeforeDate: Date;
-
-  @ViewColumn({ name: 'eight_weeks_after_date' })
-  eightWeeksAfterDate: Date;
-
-  @ViewColumn({ name: 'movie_poster' })
-  moviePoster: string;
+  @ViewColumn({ name: 'company_name' })
+  companyName: string;
 
   @ViewColumn({ name: 'country' })
   country: string;
 
-  @ViewColumn({ name: 'company_name' })
-  companyName: string;
+  @ViewColumn({ name: 'movie_poster' })
+  moviePoster: string;
 }

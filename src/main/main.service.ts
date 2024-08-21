@@ -29,39 +29,59 @@ export class MainService {
   async getMainMovies(): Promise<MainMovieResponseDto> {
     try {
       const movieList = await this.mainMovieRepository.find();
+
+      const movieListWithStockData = await Promise.all(
+        movieList.map(async (movie) => {
+          const movieId = movie.movieId;
+
+          try {
+            const stockPriceList = await this.mainMovieRepository
+              .createQueryBuilder('m')
+              .select(['stock.stock_date', 'stock.close_price'])
+              .innerJoin(
+                'company',
+                'company',
+                'company.company_name = m.company_name',
+              )
+              .innerJoin(
+                'stock',
+                'stock',
+                `stock.ticker_name = company.ticker_name 
+                 AND stock.stock_date BETWEEN m.movie_open_date - INTERVAL '4 weeks' 
+                 AND m.movie_open_date + INTERVAL '4 weeks'`,
+              )
+              .where('m.movie_id = :movieId', { movieId })
+              .getRawMany();
+
+            return {
+              movieId: movie.movieId,
+              movieTitle: movie.movieTitle,
+              moviePoster: movie.moviePoster.split('|'),
+              country: movie.country.trim(),
+              companyName: movie.companyName,
+              stockPriceList: stockPriceList.map((stock) => ({
+                price: Number(stock.close_price),
+                date: getYYYYMMDDDate(stock.stock_date),
+              })),
+            };
+          } catch (err) {
+            console.error('Error fetching stock data for movie:', err);
+            throw new HttpException(
+              '영화 관련 주식 데이터를 가져오는데 실패했습니다.',
+              HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+          }
+        }),
+      );
+
       return {
-        movieList: movieList.map((movie) => ({
+        movieList: movieListWithStockData.map((movie) => ({
           movieId: movie.movieId,
           movieTitle: movie.movieTitle,
-          posterUrl: movie.moviePoster.split('|'),
-          countryCode: movie.country.trim(),
+          posterUrl: movie.moviePoster,
+          countryCode: movie.country,
           companyName: movie.companyName,
-          beforePrice: Number(movie.fourWeeksBeforePrice),
-          afterPrice: Number(movie.fourWeeksAfterPrice),
-          beforeDate: getYYYYMMDDDate(movie.fourWeeksBeforeDate),
-          afterDate: getYYYYMMDDDate(movie.fourWeeksAfterDate),
-          stockPriceList: [
-            {
-              price: Number(movie.eightWeeksBeforePrice),
-              date: getYYYYMMDDDate(movie.eightWeeksBeforeDate),
-            },
-            {
-              price: Number(movie.fourWeeksBeforePrice),
-              date: getYYYYMMDDDate(movie.fourWeeksBeforeDate),
-            },
-            {
-              price: Number(movie.movieOpenDateStockPrice),
-              date: getYYYYMMDDDate(movie.movieOpenDateStockDate),
-            },
-            {
-              price: Number(movie.fourWeeksAfterPrice),
-              date: getYYYYMMDDDate(movie.fourWeeksAfterDate),
-            },
-            {
-              price: Number(movie.eightWeeksAfterPrice),
-              date: getYYYYMMDDDate(movie.eightWeeksAfterDate),
-            },
-          ],
+          stockPriceList: movie.stockPriceList,
         })),
         movieListCount: movieList.length,
       };
