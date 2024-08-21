@@ -6,8 +6,6 @@ import {
   ParseIntPipe,
   Query,
   Req,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { MovieListService } from './movie-list.service';
 import {
@@ -70,9 +68,7 @@ export class MovieListController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
-  // TODO: query parameter 검증 로직, 커스텀으로 변경 및 자체 에러코드 설정
-  @UsePipes(ValidationPipe)
-  // TODO: 매직 넘버 상수 변수로 대체
+  // TODO: query parameter 검증 로직, 커스텀으로 변경 및 자체 에러 문구 설정
   async pollMovieList(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @Query(
@@ -96,6 +92,7 @@ export class MovieListController {
       // const userId: number | null = null;
       const userId: number | null = null;
 
+      // TODO: poll 값에 따라 조건문으로 나누지 말고 처리
       if (poll === true) {
         return this.movieListService.getPollMovies(
           true,

@@ -13,15 +13,10 @@ import {
 } from '@nestjs/swagger';
 import { AccessTokenGuard } from 'src/auth/jwt/accessToken.guard';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
-import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
-import { OptionalAccessTokenGuard } from 'src/auth/optionalAccessToken.guard';
-import { UsersModel } from 'src/users/entities/users.entity';
+import { PollBoxResponseDto } from './dto/poll-box.dto';
 import { User } from 'src/users/users.decorator';
-// import { JwtStrategy } from 'src/auth/Jwt/Jwt.strategy';
 import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
 import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
-// import { Repository } from 'typeorm';
-// import { Poll } from './entities/poll.entity';
 
 @ApiTags('투표 관련')
 @Controller('api/v1/poll')

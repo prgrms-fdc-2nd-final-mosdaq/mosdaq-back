@@ -1,4 +1,13 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseBoolPipe,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { MainService } from './main.service';
 import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
 import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
@@ -12,6 +21,11 @@ import {
 } from '@nestjs/swagger';
 import { SWAGGER_INTERNAL_SERVER_ERROR_CONTENT } from 'src/constants';
 import { MainMovieResponseDto } from './dto/main-movie-response.dto';
+import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
+import {
+  PopularMoviePollingDto,
+  PopularMoviesPollingResponseDto,
+} from './dto/popular-movie-polling-response.dto';
 
 @Controller('api/v1/main-movie')
 @ApiTags('대표 영화 api')
@@ -47,9 +61,9 @@ export class MainController {
   @ApiQuery({
     name: 'poll',
     required: true,
-    type: 'string',
     description: '투표 활성화 여부 (true)',
   })
+  // TODO: responseDTO 를 swagger type으로 적용
   @ApiOkResponse({
     description: '성공적으로 투표 중인 영화 목록을 반환했습니다.',
     schema: {
@@ -79,21 +93,24 @@ export class MainController {
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
   @UseGuards(JwtAuthGuard)
-  async popularPollingMovies(
-    @Query('poll') poll: string,
+  async popularMoviesPoll(
+    @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @User() user: JwtUserDto | null,
-  ) {
+  ): Promise<PopularMoviesPolledResponseDto | PopularMoviesPollingResponseDto> {
+    // TODO: response DTO
     try {
       const userId = user?.sub ? user.sub : null;
-      if (poll === 'true') {
+      console.log('userId in popularMoviesPoll() : ', userId);
+
+      if (poll === true) {
         return await this.mainService.getPopularMoviesPolling(userId);
-      } else if (poll === 'false') {
+      } else if (poll === false) {
         return await this.mainService.getPopularMoviesPolled();
       } else {
         throw new Error('Invalid poll query parameter');
       }
     } catch (err) {
-      console.error('Error in popularPollingMovies:', err);
+      console.error('Error in popularMoviesPoll:', err);
       throw err;
     }
   }
