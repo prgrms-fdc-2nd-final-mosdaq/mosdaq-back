@@ -11,13 +11,17 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AccessTokenGuard } from 'src/auth/accessToken.guard';
+import { AccessTokenGuard } from 'src/auth/jwt/accessToken.guard';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
 import { OptionalAccessTokenGuard } from 'src/auth/optionalAccessToken.guard';
+import { UsersModel } from 'src/users/entities/users.entity';
+import { User } from 'src/users/users.decorator';
+// import { JwtStrategy } from 'src/auth/Jwt/Jwt.strategy';
+import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
+import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
 // import { Repository } from 'typeorm';
 // import { Poll } from './entities/poll.entity';
-
 
 @ApiTags('투표 관련')
 @Controller('api/v1/poll')
@@ -50,16 +54,16 @@ export class PollController {
     description: '요청하신 정보를 찾을 수 없습니다.',
   })
   @UseGuards(AccessTokenGuard)
+  @UseGuards(JwtAuthGuard)
   // TODO: ValidationPipe 별도 로직으로 분리
   async poll(
     @Param('movieId') movieId: number,
     // @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     // doPollDto: DoPollDto,
     @Body('pollResult') pollResult: 'up' | 'down',
-    @Request() req,
+    @User() user: JwtUserDto | null,
   ): Promise<DoPollResponseDto> {
-    const userId: number = req.user.sub;
-    const doPollDto: DoPollDto = { movieId, userId, pollResult };
+    const doPollDto: DoPollDto = { movieId, userId: user?.sub, pollResult };
 
     if (!doPollDto.pollResult) {
       throw new BadRequestException(
@@ -67,7 +71,7 @@ export class PollController {
       );
     }
 
-    doPollDto.userId = userId;
+    doPollDto.userId = user.sub;
     doPollDto.movieId = movieId;
 
     console.log('doPollDto : ', doPollDto);
@@ -92,17 +96,13 @@ export class PollController {
   @ApiNotFoundResponse({
     description: '요청하신 정보를 찾을 수 없습니다.',
   })
-  @UseGuards(OptionalAccessTokenGuard)
+  @UseGuards(JwtAuthGuard)
   async getPollBox(
-    @Param('movieId') id: number,
-    @Request() req,
+    @Param('movieId') movieId: number,
+    @User() user: JwtUserDto | null,
   ): Promise<PollBoxResponseDto> {
-    const userId: number = req.user ? req.user.sub : null;
-    const pollBoxDto: PollBoxDto = { id, userId };
+    console.log('user : ', user);
 
-    pollBoxDto.id = id;
-    pollBoxDto.userId = userId;
-
-    return this.pollService.getPollBoxByMovieId(pollBoxDto);
+    return this.pollService.getPollBoxByMovieId(movieId, user);
   }
 }

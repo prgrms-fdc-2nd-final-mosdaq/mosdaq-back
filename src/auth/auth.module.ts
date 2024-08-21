@@ -6,7 +6,8 @@ import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AccessTokenGuard } from './accessToken.guard';
+import { AccessTokenGuard } from './jwt/accessToken.guard';
+import { JwtAuthGuard } from './jwt/JwtAuth.guard';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { AccessTokenGuard } from './accessToken.guard';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          issuer: configService.get<string>('JWT_ISSUER'), // issuer 추가
+          issuer: configService.get<string>('JWT_ISSUER'),
         },
       }),
       inject: [ConfigService],
@@ -26,6 +27,6 @@ import { AccessTokenGuard } from './accessToken.guard';
   ],
   exports: [AccessTokenGuard, JwtModule],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, AccessTokenGuard],
+  providers: [AuthService, GoogleStrategy, AccessTokenGuard, JwtAuthGuard],
 })
 export class AuthModule {}

@@ -6,7 +6,7 @@ export class DoPollDto {
   @IsInt()
   movieId: number;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
   @IsInt()
   userId: number;
 

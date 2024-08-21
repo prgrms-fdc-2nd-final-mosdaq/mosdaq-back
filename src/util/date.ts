@@ -10,3 +10,7 @@ export const shiftDateByWeeks = (openDate: Date, isPast: boolean) => {
 export const getYesterdayDate = (date: Date) => {
   return new Date(dayjs(date).subtract(1, 'day').format('YYYY-MM-DD'));
 };
+
+export const getYYYYMMDDDate = (date: Date) => {
+  return dayjs(date).format('YYYY-MM-DD');
+};
