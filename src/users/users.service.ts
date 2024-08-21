@@ -190,6 +190,11 @@ export class UsersService {
       .andWhere(`m.movie_open_date ${dateComparison} CURRENT_DATE`)
       .getCount();
 
+    //
+    /** TODO: 페이지 네이션
+     * 1. 페이지 계산 이상한 부분 처리, 검색 결과가 없는데 currentPage가 totalPage보다 1 더 많은 이유
+     * 2. 요청에서 마지막 페이지를 요청할 떄라거나 엣지 케이스인 경우의 처리
+     */
     const currentPage = Math.floor(offset / limit) + 1;
     const totalPages = Math.ceil(totalMoviesCount / limit);
 
