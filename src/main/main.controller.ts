@@ -88,7 +88,6 @@ export class MainController {
     @User() user: JwtUserDto | null,
   ): Promise<PopularMoviesPolledResponseDto | PopularMoviesPollingResponseDto> {
     const userId = user?.sub ? user.sub : null;
-    console.log('userId in popularMoviesPoll() : ', userId);
 
     if (poll === true)
       return await this.mainService.getPopularMoviesPolling(userId);

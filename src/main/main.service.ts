@@ -161,7 +161,7 @@ export class MainService {
         up: Number(movie.upPolls),
         down: Number(movie.downPolls),
         countryCode: movie.country.trim(),
-        // TODO: companyName 포함
+        companyName: movie.companyName,
         beforePrice: Number(movie.beforePrice),
         afterPrice: Number(movie.afterPrice),
         beforePriceDate: getYYYYMMDDDate(movie.beforeDate),
