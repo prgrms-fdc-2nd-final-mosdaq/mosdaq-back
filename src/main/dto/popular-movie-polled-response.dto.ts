@@ -51,7 +51,7 @@ export class PopularMoviePolledMovieDto {
   })
   @Expose()
   @IsISO8601()
-  beforePriceDate: string; // ISO 형식의 날짜 문자열
+  beforePriceDate: string;
 
   @ApiProperty({
     description: '개봉 4주 후 날짜',
@@ -59,7 +59,7 @@ export class PopularMoviePolledMovieDto {
   })
   @Expose()
   @IsISO8601()
-  afterPriceDate: string; // ISO 형식의 날짜 문자열
+  afterPriceDate: string;
 }
 
 export class PopularMoviesPolledResponseDto {

@@ -144,7 +144,6 @@ export class MainService {
     }
   }
 
-  // TODO: 투표 수가 0일때 '0'으로 가져와지고 그로인하여 결과가 null로 나오는 이슈 해결 필요
   async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
     try {
       const queryBuilder: SelectQueryBuilder<PopularMoviePolledView> =
