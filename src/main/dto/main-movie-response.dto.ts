@@ -1,7 +1,7 @@
 // 📄 src/movies/dto/popular-movies-polled-response.dto.ts
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsArray, IsISO8601 } from 'class-validator';
+import { IsNumber, IsString, IsArray } from 'class-validator';
 
 export class StockPriceDto {
   @ApiProperty({ description: '주식 가격' })
@@ -15,9 +15,7 @@ export class StockPriceDto {
   date: string;
 }
 
-// TO KNOW: Expose, Exclude 특징과 차이점 언제 쓰는가
 export class MainMovieDto {
-  // export class PopularMoviePolledMovieDto {
   @ApiProperty({ description: '영화의 고유 식별자' })
   @Expose()
   @IsNumber()
@@ -43,34 +41,9 @@ export class MainMovieDto {
   @IsString()
   companyName: string;
 
-  @ApiProperty({ description: '개봉 4주 전 주식 가격' })
-  @Expose()
-  @IsNumber()
-  beforePrice: number;
-
-  @ApiProperty({ description: '개봉 4주 후 주식 가격' })
-  @Expose()
-  @IsNumber()
-  afterPrice: number;
-
   @ApiProperty({
-    description: '개봉 4주 전 날짜',
-    example: '2023-01-01',
-  })
-  @Expose()
-  @IsISO8601()
-  beforeDate: string;
-
-  @ApiProperty({
-    description: '개봉 4주 후 날짜',
-    example: '2023-01-29',
-  })
-  @Expose()
-  @IsISO8601()
-  afterDate: string;
-
-  @ApiProperty({
-    description: '개봉 4, 8주 전, 개봉일, 개봉 4, 8주 후 주식 가격',
+    description: '개봉일 기준 4주 전 후, 총 8주 간의 주식 가격',
+    type: StockPriceDto,
   })
   @Expose()
   @IsArray()
