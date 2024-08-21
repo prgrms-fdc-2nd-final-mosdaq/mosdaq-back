@@ -57,6 +57,7 @@ export class MainService {
               movieId: movie.movieId,
               movieTitle: movie.movieTitle,
               moviePoster: movie.moviePoster.split('|'),
+              movieOpenDate: movie.movieOpenDate,
               country: movie.country.trim(),
               companyName: movie.companyName,
               stockPriceList: stockPriceList.map((stock) => ({
@@ -78,6 +79,7 @@ export class MainService {
         movieList: movieListWithStockData.map((movie) => ({
           movieId: movie.movieId,
           movieTitle: movie.movieTitle,
+          movieOpenDate: movie.movieOpenDate,
           posterUrl: movie.moviePoster,
           countryCode: movie.country,
           companyName: movie.companyName,
