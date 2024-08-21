@@ -35,25 +35,23 @@ export class MainService {
           const movieId = movie.movieId;
 
           try {
-            // 직접 SQL 쿼리 사용
-            const stockPriceList = await this.mainMovieRepository.query(
-              `
-              SELECT
-                stock.stock_date,
-                stock.close_price
-              FROM
-                main_movie_view_to_be m
-              JOIN
-                company ON company.company_name = m.company_name
-              JOIN
-                stock ON stock.ticker_name = company.ticker_name
-              WHERE
-                m.movie_id = $1
-                AND stock.stock_date BETWEEN m.movie_open_date - INTERVAL '4 weeks' 
-                AND m.movie_open_date + INTERVAL '4 weeks'
-              `,
-              [movieId], // 파라미터 바인딩
-            );
+            const stockPriceList = await this.mainMovieRepository
+              .createQueryBuilder('m')
+              .select(['stock.stock_date', 'stock.close_price'])
+              .innerJoin(
+                'company',
+                'company',
+                'company.company_name = m.company_name',
+              )
+              .innerJoin(
+                'stock',
+                'stock',
+                `stock.ticker_name = company.ticker_name 
+                 AND stock.stock_date BETWEEN m.movie_open_date - INTERVAL '4 weeks' 
+                 AND m.movie_open_date + INTERVAL '4 weeks'`,
+              )
+              .where('m.movie_id = :movieId', { movieId })
+              .getRawMany();
 
             return {
               movieId: movie.movieId,
