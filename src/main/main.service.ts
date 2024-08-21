@@ -30,50 +30,30 @@ export class MainService {
     try {
       const movieList = await this.mainMovieRepository.find();
 
-      /**
-       * SELECT
-            stock.stock_date,
-            stock.close_price
-        FROM
-            main_movie_view_to_be m
-        JOIN
-            company ON company.company_name = m.company_name
-        JOIN
-            stock ON stock.ticker_name = company.ticker_name
-            AND stock.stock_date BETWEEN 
-                    m.movie_open_date - INTERVAL '4 weeks' AND 
-                    m.movie_open_date + INTERVAL '4 weeks'
-        WHERE m.movie_id= :m.movie_id
-       */
-      // movieList
       const movieListWithStockData = await Promise.all(
-        movieList.map((movie) => {
+        movieList.map(async (movie) => {
           const movieId = movie.movieId;
 
           try {
-            const queryBuilder = this.mainMovieRepository
-              .createQueryBuilder('m')
-              .select(['stock.stock_date', 'stock.close_price'])
-              .innerJoin(
-                'company',
-                'company',
-                'company.ticker_name = m.ticker_name',
-              )
-              .innerJoin(
-                'stock',
-                'stock',
-                `stock.ticker_name = company.ticker_name
-            AND stock.stock_date BETWEEN m.movie_open_date - INTERVAL '4 weeks'
-            AND m.movie_open_date + INTERVAL '4 weeks'
-            `,
-              )
-              .where('m.movie_id = :movie_id', { movieId });
-
-            const stockPriceList = queryBuilder.getMany();
-
-            console.log('stockPriceList : ', stockPriceList);
-
-            // const stockPriceList = this.mainMovieRepository.query;
+            // 직접 SQL 쿼리 사용
+            const stockPriceList = await this.mainMovieRepository.query(
+              `
+              SELECT
+                stock.stock_date,
+                stock.close_price
+              FROM
+                main_movie_view_to_be m
+              JOIN
+                company ON company.company_name = m.company_name
+              JOIN
+                stock ON stock.ticker_name = company.ticker_name
+              WHERE
+                m.movie_id = $1
+                AND stock.stock_date BETWEEN m.movie_open_date - INTERVAL '4 weeks' 
+                AND m.movie_open_date + INTERVAL '4 weeks'
+              `,
+              [movieId], // 파라미터 바인딩
+            );
 
             return {
               movieId: movie.movieId,
@@ -81,28 +61,20 @@ export class MainService {
               moviePoster: movie.moviePoster.split('|'),
               country: movie.country.trim(),
               companyName: movie.companyName,
-              // stockPriceList: (await stockPriceList).map((stock) => ({
-              //   price: stock.close_price,
-              //   date: stock.stock_date,
-              // })),
-              stockPriceList: [
-                {
-                  price: 4242,
-                  date: '2024-08-21',
-                },
-              ],
+              stockPriceList: stockPriceList.map((stock) => ({
+                price: Number(stock.close_price),
+                date: getYYYYMMDDDate(stock.stock_date),
+              })),
             };
           } catch (err) {
-            console.error('Error fetching main movies:', err);
+            console.error('Error fetching stock data for movie:', err);
             throw new HttpException(
-              '대표 영화 5개를 가져오는데 실패 하였습니다.',
+              '영화 관련 주식 데이터를 가져오는데 실패했습니다.',
               HttpStatus.INTERNAL_SERVER_ERROR,
             );
           }
         }),
       );
-
-      // movieList
 
       return {
         movieList: movieListWithStockData.map((movie) => ({
@@ -112,10 +84,6 @@ export class MainService {
           countryCode: movie.country,
           companyName: movie.companyName,
           stockPriceList: movie.stockPriceList,
-          // stockPriceList: {
-          //   price: 4242,
-          //   date: '2024-08-21',
-          // },
         })),
         movieListCount: movieList.length,
       };
