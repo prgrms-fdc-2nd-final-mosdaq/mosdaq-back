@@ -1,7 +1,6 @@
 import { ViewEntity, ViewColumn } from 'typeorm';
 
-// TODO: main_movie_view로 변경
-@ViewEntity({ name: 'main_movie_view_to_be' })
+@ViewEntity({ name: 'main_movie_view' })
 export class MainMovieView {
   @ViewColumn({ name: 'movie_id' })
   movieId: number;
