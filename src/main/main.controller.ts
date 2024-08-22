@@ -1,4 +1,11 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe,
+  Get,
+  ParseBoolPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { MainService } from './main.service';
 import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
 import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
@@ -9,9 +16,15 @@ import {
   ApiQuery,
   ApiOkResponse,
   ApiInternalServerErrorResponse,
+  ApiExtraModels,
+  getSchemaPath,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { SWAGGER_INTERNAL_SERVER_ERROR_CONTENT } from 'src/constants';
 import { MainMovieResponseDto } from './dto/main-movie-response.dto';
+import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
+import { PopularMoviesPollingResponseDto } from './dto/popular-movie-polling-response.dto';
+import { SWAGGER_UNAUTHORIZED_CONTENT } from 'src/constants/swagger.constants';
 
 @Controller('api/v1/main-movie')
 @ApiTags('대표 영화 api')
@@ -34,7 +47,6 @@ export class MainController {
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
   async mainMovie(): Promise<MainMovieResponseDto> {
-    // TOOD: 에러 핸들링, service에서 해놓았으니 controller에서 예외처리를 하지 않아도 괜찮은가?
     return await this.mainService.getMainMovies();
   }
 
@@ -47,54 +59,38 @@ export class MainController {
   @ApiQuery({
     name: 'poll',
     required: true,
-    type: 'string',
     description: '투표 활성화 여부 (true)',
   })
+  @ApiExtraModels(
+    PopularMoviesPollingResponseDto,
+    PopularMoviesPolledResponseDto,
+  )
   @ApiOkResponse({
     description: '성공적으로 투표 중인 영화 목록을 반환했습니다.',
     schema: {
-      type: 'object',
-      properties: {
-        movieList: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              movieId: { type: 'number' },
-              movieTitle: { type: 'string' },
-              posterUrl: { type: 'string' },
-              up: { type: 'number' },
-              down: { type: 'number' },
-              pollCount: { type: 'number' },
-              myPollResult: { type: 'string', nullable: true },
-            },
-          },
-        },
-        movieListCount: { type: 'number' },
-      },
+      oneOf: [
+        { $ref: getSchemaPath(PopularMoviesPollingResponseDto) },
+        { $ref: getSchemaPath(PopularMoviesPolledResponseDto) },
+      ],
     },
+  })
+  @ApiUnauthorizedResponse({
+    description: '인증이 필요합니다.',
+    content: SWAGGER_UNAUTHORIZED_CONTENT,
   })
   @ApiInternalServerErrorResponse({
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
   @UseGuards(JwtAuthGuard)
-  async popularPollingMovies(
-    @Query('poll') poll: string,
+  async popularMoviesPoll(
+    @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @User() user: JwtUserDto | null,
-  ) {
-    try {
-      const userId = user?.sub ? user.sub : null;
-      if (poll === 'true') {
-        return await this.mainService.getPopularMoviesPolling(userId);
-      } else if (poll === 'false') {
-        return await this.mainService.getPopularMoviesPolled();
-      } else {
-        throw new Error('Invalid poll query parameter');
-      }
-    } catch (err) {
-      console.error('Error in popularPollingMovies:', err);
-      throw err;
-    }
+  ): Promise<PopularMoviesPolledResponseDto | PopularMoviesPollingResponseDto> {
+    const userId = user?.sub ? user.sub : null;
+
+    if (poll === true)
+      return await this.mainService.getPopularMoviesPolling(userId);
+    else return await this.mainService.getPopularMoviesPolled();
   }
 }
