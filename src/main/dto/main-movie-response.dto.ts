@@ -26,6 +26,11 @@ export class MainMovieDto {
   @IsString()
   movieTitle: string;
 
+  @ApiProperty({ description: '영화 개봉일' })
+  @Expose()
+  @IsString()
+  movieOpenDate: string;
+
   @ApiProperty({ description: '영화 포스터의 URL 리스트' })
   @Expose()
   @IsArray()

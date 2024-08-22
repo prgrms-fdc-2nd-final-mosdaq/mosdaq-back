@@ -5,9 +5,9 @@ import {
   ParseBoolPipe,
   ParseIntPipe,
   Query,
-  Req,
+  UseGuards,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { MovieListService } from './movie-list.service';
 import {
@@ -28,13 +28,15 @@ import {
   MOVIE_LIST_DEFAULT_OFFSET,
   MOVIE_LIST_DEFAULT_SORT,
 } from 'src/constants/app.constants';
+import { User } from 'src/users/users.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
+import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
 
 @Controller('api/v1/movie/list')
 @ApiTags('영화 투표 목록 api')
 export class MovieListController {
   constructor(private readonly movieListService: MovieListService) {}
 
-  // /api/v1/movie/list?poll=true&offset={}&limit={}&sort={}
   @Get('/')
   @ApiOperation({
     summary: '투표 중인 영화 목록 API',
@@ -71,8 +73,8 @@ export class MovieListController {
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
   // TODO: query parameter 검증 로직, 커스텀으로 변경 및 자체 에러코드 설정
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  // TODO: 매직 넘버 상수 변수로 대체
   async pollMovieList(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @Query(
@@ -89,37 +91,17 @@ export class MovieListController {
     limit: number,
     @Query('sort', new DefaultValuePipe(MOVIE_LIST_DEFAULT_SORT))
     sort: 'DESC' | 'ASC',
-    @Req() request: Request,
+    @User() user: JwtUserDto | null,
   ): Promise<PollMovieListResponseDto> {
-    try {
-      // TODO: request header에서 token 뽑아내기
-      // const userId: number | null = null;
-      const userId: number | null = null;
+    const userId = user?.sub ? user.sub : null;
 
-      if (poll === true) {
-        return this.movieListService.getPollMovies(
-          true,
-          offset,
-          limit,
-          sort,
-          userId,
-        );
-      } else if (poll === false) {
-        return this.movieListService.getPollMovies(
-          false,
-          offset,
-          limit,
-          sort,
-          userId,
-        );
-      } else {
-        // TODO: 에러 헨들링
-        throw new Error('Invalid poll query parameter');
-      }
-    } catch (err) {
-      // TODO: 에러 헨들링
-      console.error('Error in /api/v1/movie/list?poll=true  : ', poll);
-      throw err;
-    }
+    return this.movieListService.getPollMovies(
+      poll,
+      offset,
+      limit,
+      sort,
+      userId,
+    );
+
   }
 }
