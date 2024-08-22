@@ -63,51 +63,6 @@ export class UserPollMovieDto {
   })
   @IsEnum(PollResult)
   pollResult: PollResult;
-
-  @ApiProperty({
-    description: '영화가 제작된 국가 코드',
-    example: 'US',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  countryCode?: string;
-
-  @ApiProperty({
-    description: '투표 전 영화 가격',
-    example: 15.99,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  beforePrice?: number;
-
-  @ApiProperty({
-    description: '투표 전 영화 가격의 날짜',
-    example: '2024-08-15',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  beforePriceDate?: string;
-
-  @ApiProperty({
-    description: '투표 후 영화 가격',
-    example: 17.99,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  afterPrice?: number;
-
-  @ApiProperty({
-    description: '투표 후 영화 가격의 날짜',
-    example: '2024-08-16',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  afterPriceDate?: string;
 }
 
 export class UserPollPaginationDto {
@@ -136,7 +91,7 @@ export class UserPollMovieListResponseDto {
 
   @ApiProperty({
     description: '목록에 있는 영화 수',
-    example: 25,
+    example: 30,
   })
   @IsNumber()
   movieListCount: number;

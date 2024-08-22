@@ -112,6 +112,7 @@ export class UsersController {
     description: '서버 내부 오류로 인해 영화 목록을 가져올 수 없습니다.',
     content: SWAGGER_INTERNAL_SERVER_ERROR_CONTENT,
   })
+  @UseGuards(JwtAuthGuard)
   async getUserPollMovies(
     @Query('poll', new DefaultValuePipe(true), ParseBoolPipe) poll: boolean,
     @Query('year', new DefaultValuePipe(new Date().getFullYear()), ParseIntPipe)
@@ -130,37 +131,18 @@ export class UsersController {
     limit: number,
     @Query('sort', new DefaultValuePipe(MOVIE_LIST_DEFAULT_SORT))
     sort: 'DESC' | 'ASC',
+    @User() user: JwtUserDto | null,
   ): Promise<UserPollMovieListResponseDto> {
-    try {
-      // TODO: request header에서 token 뽑아내기
-      const userId: number | null = null;
+    const userId = user?.sub ? user.sub : null;
 
-      if (poll === true) {
-        return this.userService.getUserPollingMovies(
-          true,
-          year,
-          offset,
-          limit,
-          sort,
-          userId,
-        );
-      } else if (poll === false) {
-        return this.userService.getUserPolledMovies(
-          false,
-          year,
-          offset,
-          limit,
-          sort,
-          userId,
-        );
-      } else {
-        // TODO: 에러 헨들링
-        throw new Error('Invalid poll query parameter');
-      }
-    } catch (err) {
-      // TODO: 에러 헨들링
-      console.error('Error in /api/v1/movie/list?poll=true  : ', poll);
-      throw err;
-    }
+    // TODO: service로 호출할 때 파라미터에 대해 DTO룰 넣을지 고려
+    return this.userService.getUserPollMovies(
+      poll,
+      year,
+      offset,
+      limit,
+      sort,
+      userId,
+    );
   }
 }

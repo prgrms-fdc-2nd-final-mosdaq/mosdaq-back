@@ -93,6 +93,7 @@ export class MovieListController {
     sort: 'DESC' | 'ASC',
     @User() user: JwtUserDto | null,
   ): Promise<PollMovieListResponseDto> {
+
     const userId = user?.sub ? user.sub : null;
 
     return this.movieListService.getPollMovies(

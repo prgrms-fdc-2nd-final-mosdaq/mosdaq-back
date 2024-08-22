@@ -1,5 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Poll } from './poll.entity';
+import { Company } from 'src/stocks/entities/company.entity';
 
 @Entity('movie')
 export class Movie {
@@ -9,7 +17,12 @@ export class Movie {
   @Column({ name: 'movie_title', type: 'character varying', length: 150 })
   movieTitle: string;
 
-  @Column({ name: 'movie_cd', type: 'character varying', length: 20 })
+  @Column({
+    name: 'movie_cd',
+    type: 'character varying',
+    length: 20,
+    unique: true,
+  })
   movieCd: string;
 
   @Column({ name: 'movie_open_date', type: 'date' })
@@ -26,6 +39,10 @@ export class Movie {
 
   @Column({ name: 'fk_company_id', type: 'character varying', length: 20 })
   companyId: string;
+
+  @ManyToOne(() => Company, (company) => company.movies)
+  @JoinColumn({ name: 'fk_company_id', referencedColumnName: 'companyCd' })
+  company: Company;
 
   @OneToMany(() => Poll, (poll) => poll.movie)
   polls: Poll[];

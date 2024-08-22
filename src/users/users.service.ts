@@ -6,13 +6,12 @@ import {
 } from '@nestjs/common';
 import { UsersModel } from './entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { MoreThan, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   PollResult,
   UserPollMovieListResponseDto,
 } from './dto/user-poll-movie-list-response.dto';
 import { Movie } from 'src/poll/entities/movie.entity';
-import { Stock } from 'src/stocks/entities/stock.entity';
 import { Company } from 'src/stocks/entities/company.entity';
 
 @Injectable()
@@ -23,9 +22,6 @@ export class UsersService {
 
     @InjectRepository(Movie)
     private readonly movieRepository: Repository<Movie>,
-
-    @InjectRepository(Stock)
-    private readonly stockRepository: Repository<Stock>,
 
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
@@ -143,66 +139,7 @@ export class UsersService {
     }
   }
 
-  async getUserPollingMovies(
-    poll: boolean,
-    year: number,
-    offset: number,
-    limit: number,
-    sort: 'DESC' | 'ASC',
-    userId: number,
-  ): Promise<UserPollMovieListResponseDto> {
-    console.log(poll);
-    console.log(year);
-    console.log(offset);
-    console.log(limit);
-    console.log(sort);
-    console.log(userId);
-
-    return {
-      movieList: [
-        {
-          movieId: 1,
-          movieTitle: 'Inception',
-          posterUrl: [
-            'https://example.com/poster1.jpg',
-            'https://example.com/poster2.jpg',
-          ],
-          up: 12,
-          down: 45,
-          pollResult: PollResult.UP,
-        },
-        {
-          movieId: 2,
-          movieTitle: 'The Matrix',
-          posterUrl: [
-            'https://example.com/matrix1.jpg',
-            'https://example.com/matrix2.jpg',
-          ],
-          up: 9,
-          down: 12,
-          pollResult: PollResult.DOWN,
-        },
-        {
-          movieId: 3,
-          movieTitle: 'Interstellar',
-          posterUrl: [
-            'https://example.com/interstellar1.jpg',
-            'https://example.com/interstellar2.jpg',
-          ],
-          up: 23,
-          down: 2,
-          pollResult: PollResult.NONE,
-        },
-      ],
-      movieListCount: 3,
-      pagination: {
-        currentPage: 1,
-        totalPages: 1,
-      },
-    };
-  }
-
-  async getUserPolledMovies(
+  async getUserPollMovies(
     poll: boolean,
     year: number,
     offset: number,
@@ -210,151 +147,71 @@ export class UsersService {
     sort: 'DESC' | 'ASC',
     userId: number | null,
   ): Promise<UserPollMovieListResponseDto> {
-    const query = `
-      SELECT 
-        m.movie_id AS "movieId",
-        m.movie_title AS "movieTitle",
-        array_agg(m.movie_poster) AS "posterUrl",
-        (SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up",
-        (SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down",
-        COALESCE((
-          SELECT CASE WHEN p.poll_flag = true THEN 'up' ELSE 'down' END
-          FROM poll p
-          WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = $1
-        ), NULL) AS "pollResult",
-        c.country AS "countryCode",
-        c.company_name AS "companyName",
-        bs.close_price AS "beforePrice",
-        bs.stock_date AS "beforePriceDate",
-        cs.close_price AS "afterPrice",
-        cs.stock_date AS "afterPriceDate"
-      FROM 
-        movie m
-      LEFT JOIN 
-        company c ON m.fk_company_id = c.company_cd
-      LEFT JOIN 
-        stock bs ON bs.ticker_name = c.ticker_name AND bs.stock_date = (
-          SELECT MAX(stock_date) 
-          FROM stock 
-          WHERE ticker_name = c.ticker_name AND stock_date < CURRENT_DATE
-        )
-      LEFT JOIN 
-        stock cs ON cs.ticker_name = c.ticker_name AND cs.stock_date = CURRENT_DATE
-      WHERE 
-        EXTRACT(YEAR FROM m.movie_open_date) = $2
-        AND m.movie_open_date < CURRENT_DATE
-      GROUP BY 
-        m.movie_id, c.country, c.company_name, bs.close_price, bs.stock_date, cs.close_price, cs.stock_date
-      ORDER BY 
-        m.movie_id ${sort}
-      OFFSET $3
-      LIMIT $4;
-    `;
+    // year 값이 YYYY 형식인지 확인
+    if (!/^\d{4}$/.test(year.toString())) {
+      throw new BadRequestException('Year must be in YYYY format');
+    }
 
-    const movies = await this.userRepository.query(query, [
-      userId,
-      year,
-      offset,
-      limit,
-    ]);
+    // poll 값에 따라 부등호 설정
+    const dateComparison = poll ? '>' : '<';
 
-    return {
-      movieList: movies.map((movie) => ({
-        movieId: movie.movieId,
-        movieTitle: movie.movieTitle,
-        posterUrl: movie.posterUrl,
-        up: Number(movie.up),
-        down: Number(movie.down),
-        pollResult: movie.pollResult,
-        countryCode: movie.countryCode || undefined,
-        companyName: movie.companyName || undefined,
-        beforePrice: parseFloat(movie.beforePrice) || undefined,
-        beforePriceDate: movie.beforePriceDate || undefined,
-        afterPrice: parseFloat(movie.afterPrice) || undefined,
-        afterPriceDate: movie.afterPriceDate || undefined,
-      })),
-      movieListCount: movies.length,
-      pagination: {
-        currentPage: Math.floor(offset / limit) + 1,
-        totalPages: Math.ceil(movies.length / limit),
-      },
-    };
-  }
-
-  /*
-  async getUserPolledMovies(
-    poll: boolean,
-    year: number,
-    offset: number,
-    limit: number,
-    sort: 'DESC' | 'ASC',
-    userId: number | null,
-  ): Promise<UserPollMovieListResponseDto> {
-    const query = this.movieRepository
+    // 사용자 투표가 있는 영화들만 선택
+    const query: SelectQueryBuilder<Movie> = this.movieRepository
       .createQueryBuilder('m')
+      .leftJoinAndSelect('m.polls', 'p', 'p.fk_user_id = :userId', { userId })
+      .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
+      .andWhere(`m.movie_open_date ${dateComparison} CURRENT_DATE`)
+      .andWhere(`p.fk_user_id = :userId`)
       .select([
         'm.movie_id AS "movieId"',
         'm.movie_title AS "movieTitle"',
-        'array_agg(m.movie_poster) AS "posterUrl"',
+        'm.movie_poster AS "posterUrl"',
         `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = true) AS "up"`,
         `(SELECT COUNT(*) FROM poll p WHERE p.fk_movie_id = m.movie_id AND p.poll_flag = false) AS "down"`,
-        `COALESCE((
+        `(
           SELECT CASE WHEN p.poll_flag = true THEN 'up' ELSE 'down' END
           FROM poll p
           WHERE p.fk_movie_id = m.movie_id AND p.fk_user_id = :userId
-        ), NULL) AS "pollResult"`,
-        'c.country AS "countryCode"',
-        'c.company_name AS "companyName"',
-        'bs.close_price AS "beforePrice"',
-        'bs.stock_date AS "beforePriceDate"',
-        'cs.close_price AS "afterPrice"',
-        'cs.stock_date AS "afterPriceDate"',
+        ) AS "pollResult"`,
       ])
-      .leftJoin('company', 'c', 'm.fk_company_id = c.company_cd')
-      .leftJoin(
-        'stock',
-        'bs',
-        'bs.ticker_name = c.ticker_name AND bs.stock_date = (SELECT MAX(stock_date) FROM stock WHERE ticker_name = c.ticker_name AND stock_date < CURRENT_DATE)',
-      )
-      .leftJoin(
-        'stock',
-        'cs',
-        'cs.ticker_name = c.ticker_name AND cs.stock_date = CURRENT_DATE',
-      )
-      .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
-      .andWhere('m.movie_open_date < CURRENT_DATE')
-      .groupBy(
-        'm.movie_id, c.country, c.company_name, bs.close_price, bs.stock_date, cs.close_price, cs.stock_date',
-      )
+      .groupBy('m.movie_id')
       .orderBy('m.movie_id', sort)
       .offset(offset)
-      .limit(limit)
-      .setParameter('userId', userId)
-      .getRawMany();
+      .limit(limit);
 
-    const movies = await query;
+    // 쿼리 실행
+    const movies = await query.getRawMany();
+
+    // 페이지네이션 계산
+    const totalMoviesCount = await this.movieRepository
+      .createQueryBuilder('m')
+      .leftJoin('m.polls', 'p', 'p.fk_user_id = :userId', { userId })
+      .where('EXTRACT(YEAR FROM m.movie_open_date) = :year', { year })
+      .andWhere(`m.movie_open_date ${dateComparison} CURRENT_DATE`)
+      .getCount();
+
+    //
+    /** TODO: 페이지 네이션
+     * 1. 페이지 계산 이상한 부분 처리, 검색 결과가 없는데 currentPage가 totalPage보다 1 더 많은 이유
+     * 2. 요청에서 마지막 페이지를 요청할 떄라거나 엣지 케이스인 경우의 처리
+     */
+    const currentPage = Math.floor(offset / limit) + 1;
+    const totalPages = Math.ceil(totalMoviesCount / limit);
 
     return {
       movieList: movies.map((movie) => ({
-        movieId: movie.movieId,
+        movieId: Number(movie.movieId),
         movieTitle: movie.movieTitle,
         posterUrl: movie.posterUrl,
         up: Number(movie.up),
         down: Number(movie.down),
         pollResult: movie.pollResult,
-        countryCode: movie.countryCode || undefined,
-        companyName: movie.companyName || undefined,
-        beforePrice: parseFloat(movie.beforePrice) || undefined,
-        beforePriceDate: movie.beforePriceDate || undefined,
-        afterPrice: parseFloat(movie.afterPrice) || undefined,
-        afterPriceDate: movie.afterPriceDate || undefined,
       })),
       movieListCount: movies.length,
       pagination: {
-        currentPage: Math.floor(offset / limit) + 1,
-        totalPages: Math.ceil(movies.length / limit),
+        currentPage,
+        totalPages,
       },
     };
   }
-  */
 }
