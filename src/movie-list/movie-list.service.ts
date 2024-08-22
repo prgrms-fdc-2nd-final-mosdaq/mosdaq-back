@@ -41,15 +41,9 @@ export class MovieListService {
       const movies = await queryBuilder.getMany();
 
       const movieList: PollMovieDto[] = movies.map((movie) => {
-        const totalPolls = movie.polls.length;
+        // TODO: 리팩터링, upPolls 갯수를 COUNT 를 이용해서 DB에서 가져올 것
         const upPolls = movie.polls.filter((poll) => poll.pollFlag).length;
         const downPolls = movie.polls.filter((poll) => !poll.pollFlag).length;
-
-        // 백분율 계산
-        const upPercentage =
-          totalPolls > 0 ? Math.round((upPolls / totalPolls) * 100) : 0;
-        const downPercentage =
-          totalPolls > 0 ? Math.round((downPolls / totalPolls) * 100) : 0;
 
         // 나의 투표 결과를 찾아 설정 (userId가 존재하는 경우에만)
         const myPoll = movie.polls.find((poll) => poll.userId === userId);
@@ -59,8 +53,8 @@ export class MovieListService {
           movieId: movie.movieId,
           movieTitle: movie.movieTitle,
           posterUrl: movie.moviePoster.split('|'),
-          up: upPercentage,
-          down: downPercentage,
+          up: Number(upPolls),
+          down: Number(downPolls),
           myPollResult,
         };
       });
