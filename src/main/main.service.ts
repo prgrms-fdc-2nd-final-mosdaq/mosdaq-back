@@ -5,13 +5,13 @@ import { MainMovieView } from './entities/main-movie-view.entity';
 import { PopularMoviePollingView } from './entities/popular-movie-polling-view.entity';
 import { PopularMoviePolledView } from './entities/popular-movie-polled-view.entity';
 import { PopularMoviesPolledResponseDto } from './dto/popular-movie-polled-response.dto';
-import { format } from 'date-fns';
 import {
   POPULAR_MOVIE_POLLED_COUNT,
   POPULAR_MOVIE_POLLING_COUNT,
 } from 'src/constants/app.constants';
 import { getYYYYMMDDDate } from 'src/util/date';
 import { MainMovieResponseDto } from './dto/main-movie-response.dto';
+import { PopularMoviesPollingResponseDto } from './dto/popular-movie-polling-response.dto';
 
 @Injectable()
 export class MainService {
@@ -57,6 +57,7 @@ export class MainService {
               movieId: movie.movieId,
               movieTitle: movie.movieTitle,
               moviePoster: movie.moviePoster.split('|'),
+              movieOpenDate: movie.movieOpenDate,
               country: movie.country.trim(),
               companyName: movie.companyName,
               stockPriceList: stockPriceList.map((stock) => ({
@@ -78,6 +79,7 @@ export class MainService {
         movieList: movieListWithStockData.map((movie) => ({
           movieId: movie.movieId,
           movieTitle: movie.movieTitle,
+          movieOpenDate: movie.movieOpenDate,
           posterUrl: movie.moviePoster,
           countryCode: movie.country,
           companyName: movie.companyName,
@@ -95,7 +97,9 @@ export class MainService {
     }
   }
 
-  async getPopularMoviesPolling(userId: number | null): Promise<any> {
+  async getPopularMoviesPolling(
+    userId: number | null,
+  ): Promise<PopularMoviesPollingResponseDto> {
     try {
       const queryBuilder = this.popularMoviePollingRepository
         .createQueryBuilder('pmv')
@@ -123,12 +127,11 @@ export class MainService {
 
       return {
         movieList: movieList.map((movie) => ({
-          movieId: parseInt(movie.movieid, 10),
+          movieId: Number(movie.movieid),
           movieTitle: movie.movietitle,
           posterUrl: movie.posterurl.split('|'),
-          up: parseInt(movie.up, 10),
-          down: parseInt(movie.down, 10),
-          pollCount: parseInt(movie.pollcount, 10) || 0,
+          up: Number(movie.up),
+          down: Number(movie.down),
           myPollResult: userId ? movie.mypollresult : null,
         })),
         movieListCount: movieList.length,
@@ -143,7 +146,6 @@ export class MainService {
     }
   }
 
-  // TODO: 투표 수가 0일때 '0'으로 가져와지고 그로인하여 결과가 null로 나오는 이슈 해결 필요
   async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
     try {
       const queryBuilder: SelectQueryBuilder<PopularMoviePolledView> =
@@ -156,23 +158,16 @@ export class MainService {
 
       const movieList = movies.map((movie) => ({
         movieId: Number(movie.movieId),
-        posterUrl: String(movie.moviePoster).split('|'),
-        movieTitle: String(movie.movieTitle),
-        up:
-          movie.pollCount && movie.upPolls !== null
-            ? Math.round(Number((movie.upPolls / movie.pollCount) * 100))
-            : 0,
-        down:
-          movie.pollCount && movie.downPolls !== null
-            ? Math.round(Number((movie.downPolls / movie.pollCount) * 100))
-            : 0,
-        countryCode: String(movie.country),
-        // TODO: companyName 포함
+        posterUrl: movie.moviePoster.split('|'),
+        movieTitle: movie.movieTitle,
+        up: Number(movie.upPolls),
+        down: Number(movie.downPolls),
+        countryCode: movie.country.trim(),
+        companyName: movie.companyName,
         beforePrice: Number(movie.beforePrice),
         afterPrice: Number(movie.afterPrice),
-        // TODO: util, getYYYYMMDDDate() 메서드로 대체
-        beforePriceDate: format(new Date(movie.beforeDate), 'yyyy-MM-dd'),
-        afterPriceDate: format(new Date(movie.afterDate), 'yyyy-MM-dd'),
+        beforePriceDate: getYYYYMMDDDate(movie.beforeDate),
+        afterPriceDate: getYYYYMMDDDate(movie.afterDate),
       }));
 
       return { movieList, movieListCount: movieList.length };

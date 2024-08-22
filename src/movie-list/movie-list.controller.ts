@@ -7,7 +7,7 @@ import {
   Query,
   UseGuards,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { MovieListService } from './movie-list.service';
 import {
@@ -102,5 +102,6 @@ export class MovieListController {
       sort,
       userId,
     );
+
   }
 }

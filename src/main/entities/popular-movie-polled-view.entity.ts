@@ -11,6 +11,9 @@ export class PopularMoviePolledView {
   @ViewColumn({ name: 'movie_open_date' })
   movieOpenDate: Date;
 
+  @ViewColumn({ name: 'company_name' })
+  companyName: string;
+
   @ViewColumn({ name: 'country' })
   country: string;
 

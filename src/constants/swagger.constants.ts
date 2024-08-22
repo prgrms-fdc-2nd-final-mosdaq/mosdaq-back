@@ -6,6 +6,14 @@ export const SWAGGER_BAD_REQUERST_CONTENT = {
   },
 };
 
+export const SWAGGER_UNAUTHORIZED_CONTENT = {
+  'application/json': {
+    example: {
+      message: '인증이 필요합니다.',
+    },
+  },
+};
+
 export const SWAGGER_INTERNAL_SERVER_ERROR_CONTENT = {
   'application/json': {
     example: {
