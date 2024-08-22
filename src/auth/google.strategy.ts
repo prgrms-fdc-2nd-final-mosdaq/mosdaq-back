@@ -5,6 +5,10 @@ import { UsersModel } from 'src/users/entities/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from '@nestjs/config';
 
+interface ExtendedProfile extends Profile {
+  picture: string;
+}
+
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -19,8 +23,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: Profile) {
-    const { id, name, emails } = profile;
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: ExtendedProfile,
+  ) {
+    const { id, name, emails, picture } = profile;
 
     const providerId = id;
     const email = emails[0].value;
@@ -29,6 +37,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       email,
       name.familyName + name.givenName,
       providerId,
+      picture,
     );
 
     return user;
