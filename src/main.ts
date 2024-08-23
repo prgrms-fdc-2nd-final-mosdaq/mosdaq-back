@@ -7,8 +7,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  // TODO: 프론트도 AWS 배포 이후에는 cors 조건 한정시키는 것으로 변경!
-  const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+  /** TODO:
+   * - 프론트도 AWS 배포 이후에는 cors 조건 한정시키는 것으로 변경!
+   * - https 처리
+   * - 'http://localhost:3000' 항목 있어야만 하는지 확인
+   */
+  const allowedOrigins = [
+    configService.get<number>('CORS_ORIGIN'),
+    'http://localhost:3000',
+  ];
 
   app.enableCors({
     origin: (origin, callback) => {

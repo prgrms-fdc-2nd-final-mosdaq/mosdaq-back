@@ -13,6 +13,7 @@ import {
 } from './dto/user-poll-movie-list-response.dto';
 import { Movie } from 'src/poll/entities/movie.entity';
 import { Company } from 'src/stocks/entities/company.entity';
+import { UserPollMovieParamDto } from './dto/user-poll-movie-list-parameter.dto';
 
 @Injectable()
 export class UsersService {
@@ -146,17 +147,14 @@ export class UsersService {
   }
 
   async getUserPollMovies(
-    poll: boolean,
-    year: number,
-    offset: number,
-    limit: number,
-    sort: 'DESC' | 'ASC',
-    userId: number | null,
+    userPollMovieParamDto: UserPollMovieParamDto,
   ): Promise<UserPollMovieListResponseDto> {
-    // year 값이 YYYY 형식인지 확인
-    if (!/^\d{4}$/.test(year.toString())) {
-      throw new BadRequestException('Year must be in YYYY format');
-    }
+    const { poll, year, offset, limit, sort, userId } = userPollMovieParamDto;
+
+    // // year 값이 YYYY 형식인지 확인
+    // if (!/^\d{4}$/.test(year.toString())) {
+    //   throw new BadRequestException('Year must be in YYYY format');
+    // }
 
     // poll 값에 따라 부등호 설정
     const dateComparison = poll ? '>' : '<';
@@ -196,7 +194,6 @@ export class UsersService {
       .andWhere(`m.movie_open_date ${dateComparison} CURRENT_DATE`)
       .getCount();
 
-    //
     /** TODO: 페이지 네이션
      * 1. 페이지 계산 이상한 부분 처리, 검색 결과가 없는데 currentPage가 totalPage보다 1 더 많은 이유
      * 2. 요청에서 마지막 페이지를 요청할 떄라거나 엣지 케이스인 경우의 처리
