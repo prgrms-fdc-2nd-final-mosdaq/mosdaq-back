@@ -35,4 +35,11 @@ export class UsersModel {
     type: 'character varying',
   })
   providerId: string;
+
+  @Column({
+    name: 'picture',
+    length: 255,
+    type: 'character varying',
+  })
+  picture: string;
 }

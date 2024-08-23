@@ -28,11 +28,15 @@ import {
 } from '@nestjs/swagger';
 import { TokenResponse } from './dto/tokenResponse.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { UsersService } from 'src/users/users.service';
 
 @ApiTags('auth 관련')
 @Controller('api/v1/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) {}
 
   // 백엔드 api 설계 중 토큰이 필요할 때 사용
   /*
@@ -72,16 +76,16 @@ export class AuthController {
   })
   @UsePipes(new ValidationPipe())
   async googleAuthRedirect(
-    @Req() req,
     @Body() googleOAuthDto: GoogleOAuthDto,
   ): Promise<TokenResponse> {
     const payload =
       await this.authService.validateGoogleOAuthDto(googleOAuthDto);
     console.log(payload);
-    const user = await this.authService.findUserByEmailOrSave(
+    const user = await this.userService.findUserByEmailOrSave(
       payload.email,
       payload.name,
       payload.sub,
+      payload.picture,
     );
 
     const myTokens = await this.authService.getTokens(user);

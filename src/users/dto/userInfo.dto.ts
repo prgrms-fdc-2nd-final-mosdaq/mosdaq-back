@@ -29,4 +29,11 @@ export class UserInfo {
   })
   @IsNumber()
   rank: number;
+
+  @ApiProperty({
+    description: '프로필 이미지 링크',
+    type: String,
+  })
+  @IsString()
+  picture: string;
 }

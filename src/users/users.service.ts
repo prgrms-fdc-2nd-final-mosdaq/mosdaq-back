@@ -27,7 +27,12 @@ export class UsersService {
     private readonly companyRepository: Repository<Company>,
   ) {}
 
-  async findUserByEmailOrSave(email: string, name: string, providerId: string) {
+  async findUserByEmailOrSave(
+    email: string,
+    name: string,
+    providerId: string,
+    picture: string,
+  ): Promise<UsersModel> {
     try {
       const user = await this.userRepository.findOne({
         where: {
@@ -40,6 +45,7 @@ export class UsersService {
         name,
         email,
         providerId,
+        picture,
       });
 
       const savedUser = await this.userRepository.save(newUser);
@@ -73,7 +79,7 @@ export class UsersService {
     }
   }
 
-  async findUserById(userId: number) {
+  async findUserById(userId: number): Promise<UsersModel> {
     try {
       const user = await this.userRepository.findOne({
         where: { id: userId },

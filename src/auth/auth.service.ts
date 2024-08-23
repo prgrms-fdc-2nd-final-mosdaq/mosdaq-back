@@ -24,18 +24,6 @@ export class AuthService {
     this.oauthClient = new OAuth2Client(clientId, clientSecret, 'postmessage');
   }
 
-  async findUserByEmailOrSave(email: string, name: string, providerId: string) {
-    try {
-      const user = await this.usersService.findUserByEmailOrSave(
-        email,
-        name,
-        providerId,
-      );
-
-      return user;
-    } catch {}
-  }
-
   async validateGoogleOAuthDto(googleOAuthDto: GoogleOAuthDto) {
     try {
       // 구글 code(dto : token) 검증

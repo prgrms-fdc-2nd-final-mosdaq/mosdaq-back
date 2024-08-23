@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   UseGuards,
-  Request,
   Query,
   DefaultValuePipe,
   ParseIntPipe,
@@ -72,6 +71,7 @@ export class UsersController {
       email: userInfo.email,
       point: userInfo.point,
       rank: userInfo.rank,
+      picture: userInfo.picture,
     };
   }
 
