@@ -172,7 +172,7 @@ export class MainService {
           'pmv.after_date AS afterPriceDate',
         ])
         .orderBy('pmv.poll_count', 'DESC')
-        .addOrderBy('pmv.movie_open_date', 'ASC')
+        .addOrderBy('pmv.movie_open_date', 'DESC')
         .limit(POPULAR_MOVIE_POLLED_COUNT);
 
       // TODO: queryBuilder.getRawMany() 결과가 소문자인 이슈
