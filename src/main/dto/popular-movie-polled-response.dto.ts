@@ -1,7 +1,13 @@
 // 📄 src/movies/dto/popular-movies-polled-response.dto.ts
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsArray, IsISO8601 } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  IsArray,
+  IsISO8601,
+  IsOptional,
+} from 'class-validator';
 
 // TO KNOW: Expose, Exclude 특징과 차이점 언제 쓰는가
 export class PopularMoviePolledMovieDto {
@@ -30,10 +36,20 @@ export class PopularMoviePolledMovieDto {
   @IsNumber()
   down: number;
 
+  @ApiProperty({ description: '내가 투표한 결과', example: 'up' })
+  @IsOptional()
+  @IsString()
+  myPollResult: string;
+
   @ApiProperty({ description: '영화사의 국가 코드' })
   @Expose()
   @IsString()
   countryCode: string;
+
+  @ApiProperty({ description: '영화사 이름' })
+  @Expose()
+  @IsString()
+  companyName: string;
 
   @ApiProperty({ description: '개봉 4주 전 주식 가격' })
   @Expose()
