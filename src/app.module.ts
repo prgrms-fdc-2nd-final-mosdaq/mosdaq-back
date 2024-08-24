@@ -24,6 +24,18 @@ import { Stock } from './stocks/entities/stock.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      /**
+       * .env.development.local
+        .env.test.local
+        .env.production.local
+        .env.local
+       */
+      envFilePath:
+        process.env.NODE_ENV === 'production'
+          ? '.env.production.local'
+          : process.env.NODE_ENV === 'development'
+            ? '.env.development.local'
+            : '.env.test.local',
       isGlobal: true, // Makes the ConfigModule globally available
     }),
     TypeOrmModule.forRootAsync({
@@ -60,6 +72,6 @@ import { Stock } from './stocks/entities/stock.entity';
     MovieDetailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConfigService],
 })
 export class AppModule {}
