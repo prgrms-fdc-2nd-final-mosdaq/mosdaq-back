@@ -34,6 +34,10 @@ import {
 import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
 import { User } from './users.decorator';
 import { JwtUserDto } from './dto/JwtUser.dto';
+import {
+  SortEnum,
+  UserPollMovieParamDto,
+} from './dto/user-poll-movie-list-parameter.dto';
 
 @ApiTags('user 관련')
 @Controller('api/v1/users')
@@ -130,19 +134,21 @@ export class UsersController {
     )
     limit: number,
     @Query('sort', new DefaultValuePipe(MOVIE_LIST_DEFAULT_SORT))
-    sort: 'DESC' | 'ASC',
+    sort: SortEnum,
     @User() user: JwtUserDto | null,
   ): Promise<UserPollMovieListResponseDto> {
     const userId = user?.sub ? user.sub : null;
 
     // TODO: service로 호출할 때 파라미터에 대해 DTO룰 넣을지 고려
-    return this.userService.getUserPollMovies(
+    const userPollMovieParamDto: UserPollMovieParamDto = {
       poll,
       year,
       offset,
       limit,
       sort,
       userId,
-    );
+    };
+
+    return this.userService.getUserPollMovies(userPollMovieParamDto);
   }
 }

@@ -1,3 +1,4 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -20,36 +21,13 @@ import { StocksModule } from './stocks/stocks.module';
 import { MovieDetailModule } from './movie-detail/movie-detail.module';
 import { Company } from './stocks/entities/company.entity';
 import { Stock } from './stocks/entities/stock.entity';
+import dbConfig from './config/dbConfig';
+import { validationSchema } from './config/validationSchema';
+
+import { ConfigType } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true, // Makes the ConfigModule globally available
-    }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_PORT'),
-        username: configService.get<string>('POSTGRES_USER'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
-        database: configService.get<string>('POSTGRES_DB'),
-        entities: [
-          UsersModel,
-          Poll,
-          Movie,
-          MovieQuiz,
-          MainMovieView,
-          PopularMoviePollingView,
-          PopularMoviePolledView,
-          Company,
-          Stock,
-        ],
-        synchronize: false,
-      }),
-      inject: [ConfigService],
-    }),
     MainModule,
     MovieQuizModule,
     AuthModule,
@@ -58,6 +36,48 @@ import { Stock } from './stocks/entities/stock.entity';
     MovieListModule,
     StocksModule,
     MovieDetailModule,
+    ConfigModule.forRoot({
+      envFilePath: [
+        `${__dirname}/config/env/.env.${process.env.NODE_ENV}.local`,
+      ],
+      load: [dbConfig],
+      isGlobal: true, // Makes the ConfigModule globally available
+      validationSchema,
+      // 전역이라 provider에 configService 주입 없이 사용 가능.
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigType<typeof dbConfig>) => {
+        console.log('Database Config:', {
+          host: config.dbHost,
+          port: config.dbPort,
+          username: config.dbUser,
+          password: config.dbPassword,
+          database: config.database,
+        });
+        return {
+          type: 'postgres',
+          host: config.dbHost,
+          port: parseInt(config.dbPort, 10), // dbPort is a string, so convert to number
+          username: config.dbUser,
+          password: config.dbPassword,
+          database: config.database,
+          entities: [
+            UsersModel,
+            Poll,
+            Movie,
+            MovieQuiz,
+            MainMovieView,
+            PopularMoviePollingView,
+            PopularMoviePolledView,
+            Company,
+            Stock,
+          ],
+          synchronize: false,
+        };
+      },
+      inject: [dbConfig.KEY],
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
