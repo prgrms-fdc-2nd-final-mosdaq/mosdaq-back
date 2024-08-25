@@ -119,7 +119,7 @@ export class MainService {
           'pmv.poll_count AS pollCount',
         ])
         .orderBy('pmv.poll_count', 'DESC')
-        .addOrderBy('pmv.movie_open_date', 'ASC')
+        .addOrderBy('pmv.movie_open_date', 'DESC')
         .limit(POPULAR_MOVIE_POLLING_COUNT);
 
       // TODO: queryBuilder.getRawMany() 이후 movietitle 처럼 camelCase로 안나오는 이슈 해결
@@ -137,7 +137,6 @@ export class MainService {
         movieListCount: movieList.length,
       };
     } catch (err) {
-      // TODO: 에러 핸들링 통일
       console.error('Error fetching popular polling movies:', err);
       throw new HttpException(
         `투표 중인 영화 목록을 가져오는데 실패 하였습니다.`,
@@ -146,31 +145,55 @@ export class MainService {
     }
   }
 
-  async getPopularMoviesPolled(): Promise<PopularMoviesPolledResponseDto> {
+  async getPopularMoviesPolled(
+    userId: number,
+  ): Promise<PopularMoviesPolledResponseDto> {
     try {
-      const queryBuilder: SelectQueryBuilder<PopularMoviePolledView> =
-        this.popularMoviePolledRepository
-          .createQueryBuilder('p')
-          .orderBy('p.movieOpenDate', 'DESC')
-          .limit(POPULAR_MOVIE_POLLED_COUNT);
+      const queryBuilder = this.popularMoviePolledRepository
+        .createQueryBuilder('pmv')
+        .leftJoinAndSelect(
+          'poll',
+          'p',
+          'pmv.movie_id = p.fk_movie_id AND p.fk_user_id = :userId',
+          { userId },
+        )
+        .select([
+          'pmv.movie_id AS movieId',
+          'pmv.movie_title AS movieTitle',
+          'pmv.movie_poster AS posterUrl',
+          'pmv.up_polls AS up',
+          'pmv.down_polls AS down',
+          "CASE WHEN p.poll_flag IS TRUE THEN 'up' WHEN p.poll_flag IS FALSE THEN 'down' ELSE NULL END AS mypollresult",
+          'pmv.country AS country',
+          'pmv.company_name AS companyName',
+          'pmv.before_price AS beforePrice',
+          'pmv.after_price AS afterPrice',
+          'pmv.before_date AS beforePriceDate',
+          'pmv.after_date AS afterPriceDate',
+        ])
+        .orderBy('pmv.poll_count', 'DESC')
+        .addOrderBy('pmv.movie_open_date', 'DESC')
+        .limit(POPULAR_MOVIE_POLLED_COUNT);
 
-      const movies = await queryBuilder.getMany();
+      // TODO: queryBuilder.getRawMany() 결과가 소문자인 이슈
+      const movies = await queryBuilder.getRawMany();
 
       const movieList = movies.map((movie) => ({
-        movieId: Number(movie.movieId),
-        posterUrl: movie.moviePoster.split('|'),
-        movieTitle: movie.movieTitle,
-        up: Number(movie.upPolls),
-        down: Number(movie.downPolls),
+        movieId: Number(movie.movieid),
+        movieTitle: movie.movietitle,
+        posterUrl: movie.posterurl.split('|'),
+        up: Number(movie.up),
+        down: Number(movie.down),
+        myPollResult: movie.mypollresult,
         countryCode: movie.country.trim(),
-        companyName: movie.companyName,
-        beforePrice: Number(movie.beforePrice),
-        afterPrice: Number(movie.afterPrice),
-        beforePriceDate: getYYYYMMDDDate(movie.beforeDate),
-        afterPriceDate: getYYYYMMDDDate(movie.afterDate),
+        companyName: movie.companyname,
+        beforePrice: Number(movie.beforeprice),
+        afterPrice: Number(movie.afterprice),
+        beforePriceDate: getYYYYMMDDDate(movie.beforepricedate),
+        afterPriceDate: getYYYYMMDDDate(movie.afterpricedate),
       }));
 
-      return { movieList, movieListCount: movieList.length };
+      return { movieList: movieList, movieListCount: movieList.length };
     } catch (err) {
       console.error('Error fetching popular polled movies:', err);
       throw new HttpException(

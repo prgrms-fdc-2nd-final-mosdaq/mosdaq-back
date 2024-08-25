@@ -91,6 +91,6 @@ export class MainController {
 
     if (poll === true)
       return await this.mainService.getPopularMoviesPolling(userId);
-    else return await this.mainService.getPopularMoviesPolled();
+    else return await this.mainService.getPopularMoviesPolled(userId);
   }
 }
