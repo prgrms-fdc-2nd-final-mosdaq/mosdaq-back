@@ -7,8 +7,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { MainService } from './main.service';
-import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
-import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt-auth.guard';
+import { JwtUserDto } from 'src/users/dto/jwt-user.dto';
 import { User } from 'src/users/users.decorator';
 import {
   ApiTags,

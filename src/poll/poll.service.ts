@@ -11,7 +11,7 @@ import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { POLL_PARTICIPATION_POINTS } from 'src/constants';
 import { Movie } from './entities/movie.entity';
 import { PollBoxDto, PollBoxResponseDto } from './dto/poll-box.dto';
-import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
+import { JwtUserDto } from 'src/users/dto/jwt-user.dto';
 
 // TODO: logger로 전환
 @Injectable()

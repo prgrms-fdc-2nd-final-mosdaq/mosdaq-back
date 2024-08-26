@@ -6,7 +6,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { StockInfoResponseByMovieId } from './dto/stockInfoByMovieId.dto';
+import { StockInfoResponseByMovieId } from './dto/stock-info-by-movieId.dto';
 import { StocksService } from './stocks.service';
 
 @ApiTags('영화 관련 회사 주가 정보 조회 api')
@@ -14,7 +14,7 @@ import { StocksService } from './stocks.service';
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
-  @Get('/movie/:movieId')
+  @Get('/movies/:movieId')
   @ApiOperation({
     summary: '영화 관련주 주가 정보 조회',
     description:
