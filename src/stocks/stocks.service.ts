@@ -5,8 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Movie } from 'src/poll/entities/movie.entity';
-import { shiftDateByWeeks, getYesterdayDate } from 'src/util/date';
-import { Repository, In } from 'typeorm';
+import {
+  shiftDateByWeeks,
+  getYesterdayDate,
+  getYYYYMMDDDate,
+} from 'src/util/date';
+import { Repository, In, Between } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { Stock } from './entities/stock.entity';
 import { StockDto } from './dto/stock.dto';
@@ -56,6 +60,11 @@ export class StocksService {
         company.country,
       );
 
+      const stockPrices = await this.getStockPriceByRange(
+        company.tickerName,
+        movie.movieOpenDate,
+      );
+
       return {
         beforePriceDate: fourWeeksBeforeStock.stockDate,
         beforePrice: parseFloat(fourWeeksBeforeStock.closePrice),
@@ -64,6 +73,7 @@ export class StocksService {
         stockIndustryAverageVariation: parseFloat(averageStockVariation),
         companyName: company.companyName,
         countryCode: company.country,
+        stockPriceList: stockPrices,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -75,14 +85,14 @@ export class StocksService {
   }
 
   async getStockInfo(
-    openDate: Date,
+    movieOpenDate: Date,
     tickerName: string,
     isPast: boolean,
   ): Promise<StockDto | null> {
     try {
       let shiftedDate = isPast
-        ? shiftDateByWeeks(openDate, true)
-        : shiftDateByWeeks(openDate, false);
+        ? shiftDateByWeeks(movieOpenDate, true)
+        : shiftDateByWeeks(movieOpenDate, false);
       let stock: StockDto;
       // 4주 shift된 날짜가 휴장일일 가능성 체크 + 개봉 4주가 지나지 않았을 가능성 체크
       while (1) {
@@ -144,6 +154,28 @@ export class StocksService {
       return averageVariation.toFixed(2);
     } catch (error) {
       console.log('Error in getAverageStockVariation', error);
+      throw new BadRequestException('알 수 없는 이유로 요청에 실패하였습니다.');
+    }
+  }
+
+  async getStockPriceByRange(tickerName: string, movieOpenDate: Date) {
+    try {
+      const fourWeeksBefore = shiftDateByWeeks(movieOpenDate, true);
+      const fourWeeksLater = shiftDateByWeeks(movieOpenDate, false);
+
+      const prices = await this.stockRepository.find({
+        where: {
+          tickerName: tickerName,
+          stockDate: Between(fourWeeksBefore, fourWeeksLater),
+        },
+      });
+
+      return prices.map((stock) => ({
+        price: Number(stock.closePrice),
+        date: getYYYYMMDDDate(stock.stockDate),
+      }));
+    } catch (error) {
+      console.log('Error in getStockPriceByRange', error);
       throw new BadRequestException('알 수 없는 이유로 요청에 실패하였습니다.');
     }
   }

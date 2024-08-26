@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { StockPriceDto } from 'src/main/dto/main-movie-response.dto';
 
 export class StockInfoResponseByMovieId {
   @ApiProperty({
@@ -42,4 +43,10 @@ export class StockInfoResponseByMovieId {
     type: String,
   })
   countryCode: string;
+
+  @ApiProperty({
+    description: '개봉일 기준 4주 전 후, 총 8주 간의 주식 가격',
+    type: StockPriceDto,
+  })
+  stockPriceList: StockPriceDto[];
 }

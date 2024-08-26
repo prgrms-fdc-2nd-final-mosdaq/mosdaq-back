@@ -14,7 +14,7 @@ import { StocksService } from './stocks.service';
 export class StocksController {
   constructor(private readonly stocksService: StocksService) {}
 
-  @Get('/movie/:movieId')
+  @Get('/movies/:movieId')
   @ApiOperation({
     summary: '영화 관련주 주가 정보 조회',
     description:
