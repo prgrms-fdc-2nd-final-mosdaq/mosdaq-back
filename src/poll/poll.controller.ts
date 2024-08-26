@@ -11,12 +11,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AccessTokenGuard } from 'src/auth/jwt/accessToken.guard';
+import { AccessTokenGuard } from 'src/auth/jwt/access-token.guard';
 import { DoPollDto, DoPollResponseDto } from './dto/do-poll.dto';
 import { PollBoxResponseDto } from './dto/poll-box.dto';
 import { User } from 'src/users/users.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
-import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt-auth.guard';
+import { JwtUserDto } from 'src/users/dto/jwt-user.dto';
 
 @ApiTags('투표 관련')
 @Controller('api/v1/poll')

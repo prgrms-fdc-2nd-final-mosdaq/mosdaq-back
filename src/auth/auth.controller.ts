@@ -10,9 +10,9 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UseGuards } from '@nestjs/common';
-import { RefreshAuthTokenDto } from './dto/refreshAuthToken.dto';
-import { AccessTokenGuard } from './jwt/accessToken.guard';
-import { GoogleOAuthDto } from './dto/googleOAuth.dto';
+import { RefreshAuthTokenDto } from './dto/refresh-auth-token.dto';
+import { AccessTokenGuard } from './jwt/access-token.guard';
+import { GoogleOAuthDto } from './dto/google-OAuth.dto';
 import { GoogleAuthGuard } from './google.auth.guard';
 import { Request, Response } from '@nestjs/common';
 import {
@@ -26,7 +26,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { TokenResponse } from './dto/tokenResponse.dto';
+import { TokenResponse } from './dto/token-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from 'src/users/users.service';
 

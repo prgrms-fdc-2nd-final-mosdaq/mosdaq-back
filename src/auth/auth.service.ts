@@ -8,7 +8,7 @@ import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { UsersModel } from 'src/users/entities/users.entity';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from '@nestjs/config';
-import { GoogleOAuthDto } from './dto/googleOAuth.dto';
+import { GoogleOAuthDto } from './dto/google-OAuth.dto';
 import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()

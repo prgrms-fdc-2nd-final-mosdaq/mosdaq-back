@@ -14,7 +14,7 @@ import { Repository, In, Between } from 'typeorm';
 import { Company } from './entities/company.entity';
 import { Stock } from './entities/stock.entity';
 import { StockDto } from './dto/stock.dto';
-import { StockInfoResponseByMovieId } from './dto/stockInfoByMovieId.dto';
+import { StockInfoResponseByMovieId } from './dto/stock-info-by-movieId.dto';
 
 @Injectable()
 export class StocksService {
@@ -67,10 +67,10 @@ export class StocksService {
 
       return {
         beforePriceDate: fourWeeksBeforeStock.stockDate,
-        beforePrice: parseFloat(fourWeeksBeforeStock.closePrice),
+        beforePrice: Number(fourWeeksBeforeStock.closePrice),
         afterPriceDate: fourWeeksAfterStock.stockDate,
-        afterPrice: parseFloat(fourWeeksAfterStock.closePrice),
-        stockIndustryAverageVariation: parseFloat(averageStockVariation),
+        afterPrice: Number(fourWeeksAfterStock.closePrice),
+        stockIndustryAverageVariation: Number(averageStockVariation),
         companyName: company.companyName,
         countryCode: company.country,
         stockPriceList: stockPrices,

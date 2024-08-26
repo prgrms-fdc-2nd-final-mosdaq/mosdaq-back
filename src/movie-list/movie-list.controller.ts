@@ -7,7 +7,7 @@ import {
   Query,
   UseGuards,
   UsePipes,
-  ValidationPipe
+  ValidationPipe,
 } from '@nestjs/common';
 import { MovieListService } from './movie-list.service';
 import {
@@ -29,8 +29,8 @@ import {
   MOVIE_LIST_DEFAULT_SORT,
 } from 'src/constants/app.constants';
 import { User } from 'src/users/users.decorator';
-import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
-import { JwtUserDto } from 'src/users/dto/JwtUser.dto';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt-auth.guard';
+import { JwtUserDto } from 'src/users/dto/jwt-user.dto';
 
 @Controller('api/v1/movie/list')
 @ApiTags('영화 투표 목록 api')
@@ -93,7 +93,6 @@ export class MovieListController {
     sort: 'DESC' | 'ASC',
     @User() user: JwtUserDto | null,
   ): Promise<PollMovieListResponseDto> {
-
     const userId = user?.sub ? user.sub : null;
 
     return this.movieListService.getPollMovies(
@@ -103,6 +102,5 @@ export class MovieListController {
       sort,
       userId,
     );
-
   }
 }

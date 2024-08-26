@@ -8,7 +8,7 @@ import {
   ParseBoolPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { AccessTokenGuard } from 'src/auth/jwt/accessToken.guard';
+import { AccessTokenGuard } from 'src/auth/jwt/access-token.guard';
 import {
   ApiBadRequestResponse,
   ApiHeader,
@@ -20,7 +20,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UserInfo } from './dto/userInfo.dto';
+import { UserInfo } from './dto/user-info.dto';
 import { UserPollMovieListResponseDto } from './dto/user-poll-movie-list-response.dto';
 import {
   SWAGGER_BAD_REQUERST_CONTENT,
@@ -31,9 +31,9 @@ import {
   MOVIE_LIST_DEFAULT_OFFSET,
   MOVIE_LIST_DEFAULT_SORT,
 } from 'src/constants/app.constants';
-import { JwtAuthGuard } from 'src/auth/jwt/JwtAuth.guard';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt-auth.guard';
 import { User } from './users.decorator';
-import { JwtUserDto } from './dto/JwtUser.dto';
+import { JwtUserDto } from './dto/jwt-user.dto';
 import {
   SortEnum,
   UserPollMovieParamDto,
