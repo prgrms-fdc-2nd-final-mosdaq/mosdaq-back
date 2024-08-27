@@ -205,7 +205,7 @@ export class UsersService {
       movieList: movies.map((movie) => ({
         movieId: Number(movie.movieId),
         movieTitle: movie.movieTitle,
-        posterUrl: movie.posterUrl,
+        posterUrl: movie.posterUrl.split('|'),
         up: Number(movie.up),
         down: Number(movie.down),
         pollResult: movie.pollResult,
