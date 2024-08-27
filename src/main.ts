@@ -15,6 +15,7 @@ async function bootstrap() {
   const allowedOrigins = [
     configService.get<number>('CORS_ORIGIN'),
     'http://localhost:3000',
+    'http://mosdaq.site:8080',
   ];
 
   app.enableCors({
