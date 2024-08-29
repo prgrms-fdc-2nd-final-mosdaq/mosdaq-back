@@ -47,8 +47,11 @@ export class MovieDetailService {
         companyName: company.companyName,
       };
       return response;
-    } catch (err) {
-      console.error('Error fetching main movies:', err);
+    } catch (error) {
+      console.error('Error fetching main movies:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new HttpException(
         '영화 상세 정보를 가져오는데 실패했습니다',
         HttpStatus.INTERNAL_SERVER_ERROR,
