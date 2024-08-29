@@ -22,6 +22,7 @@ export class MovieDetailService {
         where: {
           movieId: movieId,
         },
+        relations: ['company'],
       });
 
       if (!detail) {
@@ -34,6 +35,7 @@ export class MovieDetailService {
         movieOpenDate,
         movieDescription,
         moviePoster,
+        company,
       } = detail;
 
       const response = {
@@ -41,7 +43,8 @@ export class MovieDetailService {
         movieDirector,
         movieOpenDate,
         movieDescription,
-        moviePoster: moviePoster.split('|'),
+        posterUrl: moviePoster.split('|'),
+        companyName: company.companyName,
       };
       return response;
     } catch (err) {

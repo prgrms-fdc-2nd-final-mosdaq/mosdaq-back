@@ -29,12 +29,13 @@ export class MovieDetailController {
         movieDirector: { type: 'string' },
         movieOpenDate: { type: 'string' },
         movieDescription: { type: 'string' },
-        moviePoster: {
+        posterUrl: {
           type: 'array',
           items: {
             type: 'string',
           },
         },
+        companyName: { type: 'string' },
       },
     },
   })
