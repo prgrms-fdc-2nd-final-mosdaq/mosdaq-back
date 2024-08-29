@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MovieDetailDto } from './dto/movie-detail.dto';
 import { Movie } from 'src/poll/entities/movie.entity';
+import { matchTickerToCompanyName } from 'src/util/company';
 
 @Injectable()
 export class MovieDetailService {
@@ -44,7 +45,7 @@ export class MovieDetailService {
         movieOpenDate,
         movieDescription,
         posterUrl: moviePoster.split('|'),
-        companyName: company.companyName,
+        companyName: matchTickerToCompanyName(company.tickerName),
       };
       return response;
     } catch (error) {

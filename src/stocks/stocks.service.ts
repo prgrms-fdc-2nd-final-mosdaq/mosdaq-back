@@ -15,6 +15,7 @@ import { Company } from './entities/company.entity';
 import { Stock } from './entities/stock.entity';
 import { StockDto } from './dto/stock.dto';
 import { StockInfoResponseByMovieId } from './dto/stock-info-by-movieId.dto';
+import { matchTickerToCompanyName } from 'src/util/company';
 
 @Injectable()
 export class StocksService {
@@ -71,7 +72,7 @@ export class StocksService {
         afterPriceDate: fourWeeksAfterStock.stockDate,
         afterPrice: Number(fourWeeksAfterStock.closePrice),
         stockIndustryAverageVariation: Number(averageStockVariation),
-        companyName: company.companyName,
+        companyName: matchTickerToCompanyName(company.tickerName),
         countryCode: company.country,
         stockPriceList: stockPrices,
       };

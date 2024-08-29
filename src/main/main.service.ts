@@ -12,6 +12,7 @@ import {
 import { getYYYYMMDDDate } from 'src/util/date';
 import { MainMovieResponseDto } from './dto/main-movie-response.dto';
 import { PopularMoviesPollingResponseDto } from './dto/popular-movie-polling-response.dto';
+import { matchTickerToCompanyName } from 'src/util/company';
 
 @Injectable()
 export class MainService {
@@ -37,7 +38,11 @@ export class MainService {
           try {
             const stockPriceList = await this.mainMovieRepository
               .createQueryBuilder('m')
-              .select(['stock.stock_date', 'stock.close_price'])
+              .select([
+                'stock.stock_date',
+                'stock.close_price',
+                'stock.ticker_name',
+              ])
               .innerJoin(
                 'company',
                 'company',
@@ -59,7 +64,9 @@ export class MainService {
               moviePoster: movie.moviePoster.split('|'),
               movieOpenDate: movie.movieOpenDate,
               country: movie.country.trim(),
-              companyName: movie.companyName,
+              companyName: matchTickerToCompanyName(
+                stockPriceList[0].ticker_name,
+              ),
               stockPriceList: stockPriceList.map((stock) => ({
                 price: Number(stock.close_price),
                 date: getYYYYMMDDDate(stock.stock_date),
@@ -149,6 +156,32 @@ export class MainService {
     userId: number,
   ): Promise<PopularMoviesPolledResponseDto> {
     try {
+      // const queryBuilder = this.popularMoviePolledRepository
+      //   .createQueryBuilder('pmv')
+      //   .leftJoinAndSelect(
+      //     'poll',
+      //     'p',
+      //     'pmv.movie_id = p.fk_movie_id AND p.fk_user_id = :userId',
+      //     { userId },
+      //   )
+      //   .select([
+      //     'pmv.movie_id AS movieId',
+      //     'pmv.movie_title AS movieTitle',
+      //     'pmv.movie_poster AS posterUrl',
+      //     'pmv.up_polls AS up',
+      //     'pmv.down_polls AS down',
+      //     "CASE WHEN p.poll_flag IS TRUE THEN 'up' WHEN p.poll_flag IS FALSE THEN 'down' ELSE NULL END AS mypollresult",
+      //     'pmv.country AS country',
+      //     'pmv.company_name AS companyName',
+      //     'pmv.before_price AS beforePrice',
+      //     'pmv.after_price AS afterPrice',
+      //     'pmv.before_date AS beforePriceDate',
+      //     'pmv.after_date AS afterPriceDate',
+      //   ])
+      //   .orderBy('pmv.poll_count', 'DESC')
+      //   .addOrderBy('pmv.movie_open_date', 'DESC')
+      //   .limit(POPULAR_MOVIE_POLLED_COUNT);
+
       const queryBuilder = this.popularMoviePolledRepository
         .createQueryBuilder('pmv')
         .leftJoinAndSelect(
@@ -156,6 +189,11 @@ export class MainService {
           'p',
           'pmv.movie_id = p.fk_movie_id AND p.fk_user_id = :userId',
           { userId },
+        )
+        .leftJoinAndSelect(
+          'company', // 회사 정보를 가져오기 위한 조인
+          'c',
+          'pmv.company_name = c.company_name', // 회사 이름을 기준으로 조인
         )
         .select([
           'pmv.movie_id AS movieId',
@@ -165,7 +203,7 @@ export class MainService {
           'pmv.down_polls AS down',
           "CASE WHEN p.poll_flag IS TRUE THEN 'up' WHEN p.poll_flag IS FALSE THEN 'down' ELSE NULL END AS mypollresult",
           'pmv.country AS country',
-          'pmv.company_name AS companyName',
+          'c.ticker_name AS tickerName', // tickerName 추가
           'pmv.before_price AS beforePrice',
           'pmv.after_price AS afterPrice',
           'pmv.before_date AS beforePriceDate',
@@ -186,7 +224,7 @@ export class MainService {
         down: Number(movie.down),
         myPollResult: movie.mypollresult,
         countryCode: movie.country.trim(),
-        companyName: movie.companyname,
+        companyName: matchTickerToCompanyName(movie.tickername),
         beforePrice: Number(movie.beforeprice),
         afterPrice: Number(movie.afterprice),
         beforePriceDate: getYYYYMMDDDate(movie.beforepricedate),
