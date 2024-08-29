@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as dayjs from 'dayjs';
 import { GetMovieQuizDto } from './dto/get-movie-quiz.dto';
 import { MovieQuizDto } from './dto/movie-quiz.dto';
+import { matchTickerToCompanyName } from 'src/util/company';
 
 @Injectable()
 export class MovieQuizService {
@@ -33,19 +34,20 @@ export class MovieQuizService {
           'movie_stock.four_weeks_after_price',
           'company.country',
           'company.company_name',
+          'company.ticker_name',
         ])
         .where("movie.movie_open_date <= CURRENT_DATE - INTERVAL '30 days'")
         .orderBy('RANDOM()')
         .limit(dto.count)
         .getRawMany();
-
+      console.log(quizzes);
       return quizzes.map((quiz) => ({
         movieTitle: quiz.movie_title,
         moviePoster: quiz.movie_poster.split('|'),
         fourWeeksBeforePrice: +quiz.four_weeks_before_price,
         fourWeeksAfterPrice: +quiz.four_weeks_after_price,
         companyCountry: quiz.company_country,
-        companyName: quiz.company_name,
+        companyName: matchTickerToCompanyName(quiz.ticker_name),
       }));
     } catch (err) {
       console.error('Error fetching main movies:', err);
