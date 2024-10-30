@@ -1,4 +1,4 @@
-import { BadRequestException, Get, Request, UseGuards } from '@nestjs/common';
+import { BadRequestException, Get, UseGuards } from '@nestjs/common';
 // import { InjectRepository } from '@nestjs/typeorm';
 import { Controller, Put, Body, Param } from '@nestjs/common';
 import { PollService } from './poll.service';

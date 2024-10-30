@@ -126,7 +126,7 @@ export class StocksService {
       });
 
       // 모든 회사에 대해 주어진 날짜의 주가를 얻음
-      let priceBoundary = await Promise.all(
+      const priceBoundary = await Promise.all(
         companies.map(async (company) => {
           const prices = await this.stockRepository.find({
             where: {
@@ -135,8 +135,16 @@ export class StocksService {
             },
           });
 
-          let fromPrice = +prices[0].closePrice;
-          let toPrice = +prices[1].closePrice;
+          let fromPrice = 0;
+          let toPrice = 0;
+
+          if (prices.length > 1) {
+            fromPrice = +prices[0].closePrice;
+            toPrice = +prices[1].closePrice;
+          } else {
+            fromPrice = +prices[0].closePrice;
+            toPrice = +prices[0].closePrice;
+          }
 
           return { fromPrice, toPrice };
         }),
