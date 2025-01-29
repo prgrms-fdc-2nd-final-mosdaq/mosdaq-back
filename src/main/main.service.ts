@@ -125,8 +125,7 @@ export class MainService {
           'pmv.movie_poster AS posterUrl',
           'pmv.poll_count AS pollCount',
         ])
-        .orderBy('pmv.poll_count', 'DESC')
-        .addOrderBy('pmv.movie_open_date', 'DESC')
+        .orderBy('pmv.movie_open_date', 'ASC')
         .limit(POPULAR_MOVIE_POLLING_COUNT);
 
       // TODO: queryBuilder.getRawMany() 이후 movietitle 처럼 camelCase로 안나오는 이슈 해결
